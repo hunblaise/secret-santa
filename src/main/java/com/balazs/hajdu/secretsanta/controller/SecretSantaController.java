@@ -23,7 +23,7 @@ public class SecretSantaController {
 
     private final GraphMappingService graphMappingService;
     private final DummyHamiltonianTourService tourService;
-    private MailingService mailingService;
+    private final MailingService mailingService;
 
     @Autowired
     public SecretSantaController(GraphMappingService graphMappingService, DummyHamiltonianTourService tourService, MailingService mailingService) {
