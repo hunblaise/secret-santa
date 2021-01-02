@@ -1,8 +1,11 @@
 language: java
-script: mvn clean install
 jdk:
   - openjdk14
 notifications:
   email: false
 before_install:
   - chmod +x mvnw
+  - echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
+script:
+  - ./mvnw clean install
+  - ./mvnw deploy jib:build -P deploy-docker
