@@ -30,7 +30,7 @@ public class DummyHamiltonianTourService {
 
     private Pair generatePairFromEntry(Map.Entry<Vertex, List<Vertex>> fromVertex, List<Vertex> alreadyUsedVertices) {
         Random random = new Random();
-        List<Vertex> possiblePairs = fromVertex.getValue();
+        List<Vertex> possiblePairs = new ArrayList<>(fromVertex.getValue());
         possiblePairs.removeAll(alreadyUsedVertices);
         Vertex generatedPair = possiblePairs.get(random.nextInt(possiblePairs.size()));
         alreadyUsedVertices.add(generatedPair);
