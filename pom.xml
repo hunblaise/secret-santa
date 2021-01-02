@@ -112,6 +112,9 @@
                         <artifactId>jib-maven-plugin</artifactId>
                         <version>${jib.plugin.version}</version>
                         <configuration>
+                            <from>
+                                <image>openjdk:14-alpine</image>
+                            </from>
                             <to>
                                 <image>${docker.hub.username}/secret-santa</image>
                                 <tags>
