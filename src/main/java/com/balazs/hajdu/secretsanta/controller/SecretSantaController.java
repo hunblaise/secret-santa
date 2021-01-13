@@ -1,6 +1,5 @@
 package com.balazs.hajdu.secretsanta.controller;
 
-import com.balazs.hajdu.secretsanta.domain.Graph;
 import com.balazs.hajdu.secretsanta.domain.request.SecretSantaRequest;
 import com.balazs.hajdu.secretsanta.domain.response.Pair;
 import com.balazs.hajdu.secretsanta.service.DummyHamiltonianTourService;
@@ -34,8 +33,8 @@ public class SecretSantaController {
 
     @PostMapping(GENERATE_PAIRS)
     public Flux<Pair> generateSecretSantaPairs(@RequestBody SecretSantaRequest request) {
-        Mono<Graph> graph = graphMappingService.generateGraph(request);
-        return tourService.generateSecretSantaPairs(graph)
+        return Mono.just(request).flatMap(graphMappingService::generateGraph)
+                .flatMapMany(tourService::generateSecretSantaPairs)
                 .doOnNext(pair -> sendEmail(request, pair));
     }
 

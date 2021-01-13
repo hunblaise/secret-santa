@@ -6,7 +6,6 @@ import com.balazs.hajdu.secretsanta.domain.response.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Map;
@@ -30,7 +29,7 @@ class DummyHamiltonianTourServiceTest {
                 new Vertex("label-2"), List.of(new Vertex("label-1"))));
 
         // when
-        Flux<Pair> pairs = victim.generateSecretSantaPairs(Mono.just(graph));
+        Flux<Pair> pairs = victim.generateSecretSantaPairs(graph);
 
         // then
         List<Pair> actual = pairs.collectList().block();

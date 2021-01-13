@@ -1,18 +1,16 @@
 package com.balazs.hajdu.secretsanta.service;
 
+import com.balazs.hajdu.secretsanta.domain.Graph;
+import com.balazs.hajdu.secretsanta.domain.Vertex;
+import com.balazs.hajdu.secretsanta.domain.response.Pair;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.balazs.hajdu.secretsanta.domain.Graph;
-import com.balazs.hajdu.secretsanta.domain.Vertex;
-import com.balazs.hajdu.secretsanta.domain.response.Pair;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 /**
  * @author Balazs_Hajdu
@@ -20,9 +18,9 @@ import reactor.core.publisher.Mono;
 @Service
 public class DummyHamiltonianTourService {
 
-    public Flux<Pair> generateSecretSantaPairs(Mono<Graph> graph) {
+    public Flux<Pair> generateSecretSantaPairs(Graph graph) {
         List<Vertex> alreadyUsedVertices = new ArrayList<>();
-        return graph.map(Graph::getVertices)
+        return Mono.just(graph).map(Graph::getVertices)
                 .map(Map::entrySet)
                 .flatMapMany(Flux::fromIterable)
                 .map(fromVertex -> generatePairFromEntry(fromVertex, alreadyUsedVertices));
