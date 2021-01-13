@@ -35,10 +35,13 @@ public class SecretSantaController {
     @PostMapping(GENERATE_PAIRS)
     public Flux<Pair> generateSecretSantaPairs(@RequestBody SecretSantaRequest request) {
         Mono<Graph> graph = graphMappingService.generateGraph(request);
-        Flux<Pair> pairs = tourService.generateSecretSantaPairs(graph);
+        return tourService.generateSecretSantaPairs(graph)
+                .doOnNext(pair -> sendEmail(request, pair));
+    }
+
+    private void sendEmail(SecretSantaRequest request, Pair pair) {
         if (request.isEmailSendingEnabled()) {
-            mailingService.sendMails(pairs, request.getMappings());
+            mailingService.sendMails(pair, request.getMappings());
         }
-        return pairs;
     }
 }

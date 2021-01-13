@@ -7,9 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,15 +29,15 @@ public class MailingService {
         this.javaMailSender = javaMailSender;
     }
 
-    public void sendMails(Flux<Pair> pairs, Map<String, String> mailNameMappings) {
-        pairs.map(pair -> createSimpleMailMessage(pair, mailNameMappings))
+    public void sendMails(Pair pair, Map<String, String> mailNameMappings) {
+        Mono.just(createSimpleMailMessage(pair, mailNameMappings))
                 .doOnNext(javaMailSender::send)
                 .onErrorContinue(this::handleException)
                 .subscribe();
     }
 
     private void handleException(Throwable throwable, Object o) {
-        LOGGER.error("Error happened during the mail sending: {}", o);
+        LOGGER.error("Error happened during the mail sending: message={}, error={}", o, throwable.getMessage());
     }
 
     private SimpleMailMessage createSimpleMailMessage(Pair pair, Map<String, String> mailNameMappings) {
