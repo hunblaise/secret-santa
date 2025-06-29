@@ -18,6 +18,8 @@ import java.util.Random;
 @Service
 public class DummyHamiltonianTourService {
 
+    private static final List<Vertex> cheatPairs = List.of();
+
     public Flux<Pair> generateSecretSantaPairs(Graph graph) {
         List<Vertex> alreadyUsedVertices = new ArrayList<>();
         return Mono.just(graph).map(Graph::getVertices)

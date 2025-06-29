@@ -22,8 +22,12 @@ public class GraphMappingService {
     public Mono<Graph> generateGraph(SecretSantaRequest request) {
         return Flux.fromIterable(request.getEmails())
                 .map(Vertex::new)
-                .collectMap(Function.identity(), vertex -> createVertices(request, vertex))
-                .map(Graph::new);
+                .collectMap(Function.identity(), vertex -> {
+                    if (request.getCheats() != null && request.getCheats().containsKey(vertex.getLabel())) {
+                        return List.of(new Vertex(request.getCheats().get(vertex.getLabel())));
+                    }
+                    return createVertices(request, vertex);
+                }).map(Graph::new);
     }
 
     private List<Vertex> createVertices(SecretSantaRequest request, Vertex vertex) {
@@ -43,7 +47,7 @@ public class GraphMappingService {
     }
 
     private List<String> getExclusionsOrDefault(Vertex parent, Map<String, List<String>> exclusions) {
-        return exclusions.getOrDefault(parent.getLabel(), List.of());
+        return (exclusions != null) ? exclusions.getOrDefault(parent.getLabel(), List.of()) : List.of();
     }
 
 }

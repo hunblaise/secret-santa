@@ -31,6 +31,7 @@ class GraphMappingServiceTest {
                 "email-2", List.of("email-1"),
                 "email-3", List.of("email-2"),
                 "email-4", List.of()));
+        request.setCheats(Map.of());
 
         // and
         Vertex vertex1 = new Vertex("email-1");

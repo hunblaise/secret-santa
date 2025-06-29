@@ -2,7 +2,7 @@ package com.balazs.hajdu.secretsanta.controller;
 
 import com.balazs.hajdu.secretsanta.domain.request.SecretSantaRequest;
 import com.balazs.hajdu.secretsanta.domain.response.Pair;
-import com.balazs.hajdu.secretsanta.service.DummyHamiltonianTourService;
+import com.balazs.hajdu.secretsanta.service.HamiltonianTourService;
 import com.balazs.hajdu.secretsanta.service.GraphMappingService;
 import com.balazs.hajdu.secretsanta.service.MailingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +21,11 @@ public class SecretSantaController {
     private static final String GENERATE_PAIRS = "/generatePairs";
 
     private final GraphMappingService graphMappingService;
-    private final DummyHamiltonianTourService tourService;
+    private final HamiltonianTourService tourService;
     private final MailingService mailingService;
 
     @Autowired
-    public SecretSantaController(GraphMappingService graphMappingService, DummyHamiltonianTourService tourService, MailingService mailingService) {
+    public SecretSantaController(GraphMappingService graphMappingService, HamiltonianTourService tourService, MailingService mailingService) {
         this.graphMappingService = graphMappingService;
         this.tourService = tourService;
         this.mailingService = mailingService;

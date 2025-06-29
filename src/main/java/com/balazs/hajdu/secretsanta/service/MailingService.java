@@ -44,7 +44,11 @@ public class MailingService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(pair.getFrom());
         message.setSubject(MAIL_SUBJECT);
-        message.setText(String.format(MAIL_TEXT, mailNameMappings.get(pair.getFrom()), mailNameMappings.get(pair.getTo())));
+
+        String fromName = (mailNameMappings != null) ? mailNameMappings.get(pair.getFrom()) : pair.getFrom();
+        String toName = (mailNameMappings != null) ? mailNameMappings.get(pair.getTo()) : pair.getTo();
+        
+        message.setText(String.format(MAIL_TEXT, fromName, toName));
         LOGGER.debug(message.getText());
         return message;
     }

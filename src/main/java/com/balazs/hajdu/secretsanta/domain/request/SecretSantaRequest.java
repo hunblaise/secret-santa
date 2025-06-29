@@ -11,6 +11,7 @@ public class SecretSantaRequest {
     private List<String> emails;
     private Map<String, List<String>> exclusions;
     private Map<String, String> mappings;
+    private Map<String, String> cheats;
     private boolean emailSendingEnabled;
 
     public List<String> getEmails() {
@@ -35,6 +36,14 @@ public class SecretSantaRequest {
 
     public void setMappings(Map<String, String> mappings) {
         this.mappings = mappings;
+    }
+
+    public Map<String, String> getCheats() {
+        return cheats;
+    }
+
+    public void setCheats(Map<String, String> cheats) {
+        this.cheats = cheats;
     }
 
     public boolean isEmailSendingEnabled() {
