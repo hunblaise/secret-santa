@@ -69,52 +69,109 @@ This project has been updated from legacy versions to modern, secure versions:
 - Removed EOL Java 14 security risks
 - Updated to supported LTS versions with active security patches
 
-### Algorithm Upgrade
-- **Replaced DummyHamiltonianTourService**: Upgraded from random assignment to real graph theory algorithm
-- **Guaranteed Valid Assignments**: New algorithm ensures everyone gives and receives exactly one gift
+### Algorithm Implementation
+- **Real Graph Theory Algorithm**: Uses backtracking with constraint propagation for optimal assignments
+- **Guaranteed Valid Assignments**: Algorithm ensures everyone gives and receives exactly one gift
 - **Constraint Handling**: Proper validation of exclusions and predetermined assignments
-- **Comprehensive Testing**: Added extensive test coverage for edge cases and constraint scenarios
+- **Comprehensive Testing**: Extensive test coverage for edge cases and constraint scenarios
+
+### Current Architecture Features
+- **Clean Controller**: Focused HTTP layer with single responsibility
+- **Service Layer Pattern**: SecretSantaOrchestrationService coordinates business operations
+- **Strategy Pattern**: Pluggable email delivery strategies (sync/async)
+- **Builder Pattern**: SecretSantaResponseBuilder for response creation
+- **Transactional Email**: Enhanced email delivery with retry logic and status tracking
+- **Clean Architecture**: Proper separation of HTTP, business, and domain concerns
 
 ## Architecture
 
-### Core Components
+### Clean Architecture Layers
 
-1. **SecretSantaController** (`src/main/java/.../controller/`)
-   - Single REST endpoint: `POST /generatePairs`
-   - Uses reactive streams (Flux/Mono) for processing
-   - Orchestrates the entire Secret Santa generation flow
+#### 1. Controller Layer (HTTP Boundary)
+**SecretSantaController** (`src/main/java/.../controller/`)
+- **Single Responsibility**: HTTP request/response handling only
+- Single REST endpoint: `POST /generatePairs`
+- **Thin Layer**: Delegates all business logic to orchestration service
+- Uses reactive streams (Mono) for non-blocking processing
 
-2. **GraphMappingService** (`src/main/java/.../service/`)
-   - Converts participant emails into a graph structure
-   - Handles exclusions (people who can't be paired)
-   - Supports "cheat" mappings for predetermined pairs
+#### 2. Service/Business Layer
+**SecretSantaOrchestrationService** (`src/main/java/.../service/`)
+- **Main Business Coordinator**: Orchestrates entire Secret Santa generation flow
+- Coordinates: Graph generation → Hamiltonian tour → Email delivery
+- Handles business errors and response building
+- Supports delivery mode overrides (sync/async)
 
-3. **HamiltonianTourService** (`src/main/java/.../service/`)
-   - **Real Hamiltonian cycle algorithm** using backtracking with constraint propagation
-   - Guarantees valid Secret Santa assignments where everyone gives and receives exactly one gift
-   - Handles constraints through exclusions and predetermined assignments
-   - Includes fallback strategy for impossible scenarios
-   - **Supporting classes:**
-     - `TourState`: Tracks path construction and backtracking state
-     - `ConstraintValidator`: Validates moves against exclusions and requirements
+**SecretSantaResponseBuilder** (`src/main/java/.../service/`)
+- **Response Creation Logic**: Encapsulates response building rules
+- Handles different response types (success/failure/email variants)
+- Separates response construction from business logic
 
-4. **MailingService** (`src/main/java/.../service/`)
-   - Sends notification emails to participants
-   - Uses Spring Mail with Gmail SMTP configuration
-   - Hungarian language email templates
-   - Gracefully handles null mappings with email fallbacks
+**Email Delivery Strategy Pattern:**
+- `EmailDeliveryStrategy` (Interface): Contract for delivery approaches
+- `SynchronousEmailDeliveryStrategy`: Transactional email delivery with wait
+- `AsynchronousEmailDeliveryStrategy`: Fire-and-forget background delivery
+- `EmailDeliveryStrategyFactory`: Strategy selection based on configuration
+
+#### 3. Core Algorithm Services
+**GraphMappingService** (`src/main/java/.../service/`)
+- Converts participant emails into graph structure
+- Handles exclusions (people who can't be paired)
+- Supports "cheat" mappings for predetermined pairs
+- Validates graph constraints
+
+**HamiltonianTourService** (`src/main/java/.../service/`)
+- **Real Hamiltonian cycle algorithm** using backtracking with constraint propagation
+- Guarantees valid Secret Santa assignments where everyone gives and receives exactly one gift
+- Handles constraints through exclusions and predetermined assignments
+- Includes fallback strategy for impossible scenarios
+- **Supporting classes:**
+  - `TourState`: Tracks path construction and backtracking state
+  - `ConstraintValidator`: Validates moves against exclusions and requirements
+
+**TransactionalMailingService** (`src/main/java/.../service/`)
+- **Enhanced Email Delivery**: Batch and individual email sending
+- **Retry Logic**: Configurable retry attempts with error handling
+- **Status Tracking**: Detailed delivery status per email recipient
+- **Transactional Behavior**: All-or-nothing batch mode option
+- Hungarian language email templates
+- Gracefully handles null mappings with email fallbacks
 
 ### Domain Models
 
+**Core Request/Response:**
 - **SecretSantaRequest**: Input containing emails, exclusions, mappings, and email settings
+- **SecretSantaResponse**: Enhanced response with pairs, email status, and error details
+- **Pair**: Output representing giver → recipient relationship
+
+**Graph Theory Models:**
 - **Graph/Vertex**: Represents the participant network with allowed connections
-- **Pair**: Output representing giver -> recipient relationship
+- **EmailDeliveryResult**: Value object containing delivery status and individual results
+
+**Email Status Tracking:**
+- **EmailStatus**: Overall delivery status (SUCCESS, FAILED, PARTIAL, PENDING, DISABLED)
+- **EmailResult**: Individual email delivery result (DELIVERED, FAILED, PENDING, SKIPPED)
 
 ### Reactive Flow
 
-The application uses Project Reactor patterns:
+The application uses Project Reactor patterns with clean layer separation:
+
+**HTTP Layer:**
 ```
-SecretSantaRequest → GraphMappingService → HamiltonianTourService → Email Notifications
+HTTP Request → SecretSantaController → SecretSantaOrchestrationService
+```
+
+**Business Layer:**
+```
+SecretSantaRequest → GraphMappingService → HamiltonianTourService → EmailDeliveryStrategy → SecretSantaResponseBuilder
+```
+
+**Email Delivery Strategies:**
+```
+# Synchronous Mode (Default)
+EmailStrategy → TransactionalMailingService → Wait for completion → Return actual status
+
+# Asynchronous Mode  
+EmailStrategy → TransactionalMailingService.subscribe() → Return PENDING immediately
 ```
 
 ### Algorithm Details
@@ -137,16 +194,46 @@ The **HamiltonianTourService** implements a sophisticated algorithm:
 - `SECRET_SANTA_GMAIL_USERNAME`: Gmail account for sending emails
 - `SECRET_SANTA_GMAIL_PASSWORD`: Gmail app password
 
-### Email Configuration
-Gmail SMTP is configured in `application.properties` with TLS encryption.
+### Email Configuration Properties
+```properties
+# Gmail SMTP configuration (in application.properties)
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+
+# Email delivery behavior
+secret-santa.email.delivery.mode=sync          # sync|async
+secret-santa.email.retry.attempts=3            # Number of retry attempts
+secret-santa.email.retry.delay=1000           # Delay between retries (ms)
+secret-santa.email.batch.enabled=true         # Enable batch email sending
+```
+
+### Email Delivery Modes
+- **Sync Mode (default)**: API waits for all emails to complete, returns actual delivery status
+- **Async Mode**: API returns immediately with PENDING status, emails sent in background
 
 ## Testing
 
 ### Test Structure
+
+**Algorithm Tests:**
 - **HamiltonianTourServiceTest**: Tests the core algorithm with various graph scenarios
 - **ConstraintValidatorTest**: Tests constraint validation logic (exclusions, cheats)
 - **TourStateTest**: Tests path construction and backtracking state management
-- **Integration Tests**: MailingService, GraphMappingService with comprehensive edge cases
+
+**Service Layer Tests:**
+- **SecretSantaOrchestrationServiceTest**: Tests business flow coordination
+- **TransactionalMailingServiceTest**: Tests email delivery with retry logic
+- **SecretSantaControllerTransactionalTest**: Tests HTTP layer with mocked orchestration
+
+**Strategy Pattern Tests:**
+- **EmailDeliveryStrategyFactoryTest**: Tests strategy selection logic
+- **SynchronousEmailDeliveryStrategyTest**: Tests transactional email behavior
+- **AsynchronousEmailDeliveryStrategyTest**: Tests fire-and-forget email behavior
+
+**Integration Tests:**
+- **GraphMappingService**, **MailingService** with comprehensive edge cases
 
 ### Test Coverage
 - Uses Mockito 5.x with @ExtendWith(MockitoExtension.class) for modern mocking
@@ -163,6 +250,18 @@ Gmail SMTP is configured in `application.properties` with TLS encryption.
 
 # Run all tests in hamiltonian package
 ./mvnw test -Dtest="com.balazs.hajdu.secretsanta.service.hamiltonian.*"
+
+# Run orchestration service tests
+./mvnw test -Dtest=SecretSantaOrchestrationServiceTest
+
+# Run email strategy tests
+./mvnw test -Dtest="*EmailDelivery*Test"
+
+# Run transactional email tests
+./mvnw test -Dtest=TransactionalMailingServiceTest
+
+# Run controller tests (now thin integration tests)
+./mvnw test -Dtest=SecretSantaControllerTransactionalTest
 ```
 
 ## CI/CD
@@ -176,9 +275,9 @@ Travis CI configuration (`.travis.yml`):
 ## Important Implementation Notes
 
 ### Null Safety
-All services now handle null inputs gracefully:
+All services handle null inputs gracefully:
 - **GraphMappingService**: Checks for null cheats and exclusions maps
-- **MailingService**: Falls back to email addresses when name mappings are null
+- **TransactionalMailingService**: Falls back to email addresses when name mappings are null
 - **ConstraintValidator**: Handles null constraint maps without exceptions
 
 ### Algorithm Behavior
@@ -186,3 +285,62 @@ All services now handle null inputs gracefully:
 - **Constraint Priority**: Cheats (predetermined assignments) take precedence over exclusions
 - **Fallback Strategy**: When no perfect Hamiltonian cycle exists, provides best-effort partial assignment
 - **Performance**: Efficiently handles typical Secret Santa groups (≤20 people) with constraint pruning
+
+### Email Delivery Behavior
+- **Transactional Semantics**: Batch mode ensures all emails succeed or detailed failure reporting
+- **Individual Retry**: Per-email retry logic with configurable attempts
+- **Graceful Degradation**: Secret Santa pairs always generated even if emails fail
+- **Status Granularity**: Individual email delivery tracking (DELIVERED/FAILED/PENDING/SKIPPED)
+- **Early Validation**: Email configuration validated before sending attempts
+
+### Design Patterns Used
+- **Strategy Pattern**: Email delivery strategies (sync/async)
+- **Builder Pattern**: Response construction with SecretSantaResponseBuilder
+- **Service Layer**: Clean separation between HTTP and business logic
+- **Dependency Inversion**: Services depend on abstractions, not concrete implementations
+- **Single Responsibility**: Each class has one clear purpose
+- **Open/Closed**: Easy to extend with new email strategies without modifying existing code
+
+## Architecture Principles
+
+The application follows clean architecture principles and design patterns:
+
+### Key Benefits
+- **Focused Controller**: HTTP layer handles only request/response concerns
+- **Loose Coupling**: Clean dependency injection with interface abstractions
+- **Easy Testing**: Business logic independently testable with focused mocks
+- **High Extensibility**: New email strategies via strategy pattern
+- **Maintainability**: Clear boundaries between architectural layers
+
+### SOLID Principles Compliance
+- **S**: Single Responsibility - Each class has one clear purpose
+- **O**: Open/Closed - Easy to extend email strategies without modification
+- **L**: Liskov Substitution - Email strategies are interchangeable
+- **I**: Interface Segregation - Focused interfaces like EmailDeliveryStrategy
+- **D**: Dependency Inversion - Services depend on abstractions
+
+## Quick Reference for Claude Code
+
+### Key Architecture Components
+```
+HTTP Layer:    SecretSantaController (thin, delegates to orchestration)
+Business:      SecretSantaOrchestrationService (main coordinator)
+Strategies:    EmailDeliveryStrategy implementations (sync/async)
+Response:      SecretSantaResponseBuilder (response creation)
+Algorithm:     HamiltonianTourService (graph theory)
+Email:         TransactionalMailingService (retry logic, status tracking)
+```
+
+### Common Development Tasks
+- **Add new email delivery strategy**: Implement EmailDeliveryStrategy interface
+- **Modify business flow**: Edit SecretSantaOrchestrationService
+- **Change response format**: Update SecretSantaResponseBuilder
+- **Algorithm improvements**: Modify HamiltonianTourService or supporting classes
+- **Email behavior changes**: Update TransactionalMailingService
+- **API changes**: Only modify SecretSantaController for HTTP concerns
+
+### Testing Strategy
+- **Business Logic**: Test orchestration service with mocked dependencies
+- **Strategies**: Test each email delivery strategy independently
+- **Controller**: Integration tests via orchestration service mock
+- **Algorithm**: Comprehensive edge case testing in HamiltonianTourServiceTest
