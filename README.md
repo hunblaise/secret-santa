@@ -7,9 +7,10 @@ A modern Spring Boot application that generates optimal Secret Santa gift assign
 - **🔄 Guaranteed Valid Assignments**: Uses real Hamiltonian cycle algorithm to ensure everyone participates
 - **🚫 Exclusion Support**: Prevent specific people from drawing each other (e.g., couples, family members)
 - **🎯 Predetermined Assignments**: Force specific gift-giving relationships ("cheats")
-- **📧 Email Notifications**: Automatic email delivery with personalized messages
-- **🌐 Reactive API**: Built with Spring WebFlux for scalable, non-blocking operations
+- **📧 Transactional Email**: All emails succeed or clear failure reporting with retry logic
+- **🌐 Reactive API**: Built with Spring WebFlux for scalable, non-blocking operations  
 - **🛡️ Robust Error Handling**: Graceful fallback when perfect assignments aren't possible
+- **⚡ Flexible Delivery**: Support for both synchronous (transactional) and asynchronous email modes
 
 ## 🚀 Quick Start
 
@@ -55,11 +56,17 @@ curl -X POST http://localhost:8080/generatePairs \
 
 **Response:**
 ```json
-[
-  {"from": "alice@example.com", "to": "charlie@example.com"},
-  {"from": "bob@example.com", "to": "alice@example.com"},
-  {"from": "charlie@example.com", "to": "bob@example.com"}
-]
+{
+  "pairs": [
+    {"from": "alice@example.com", "to": "charlie@example.com"},
+    {"from": "bob@example.com", "to": "alice@example.com"},
+    {"from": "charlie@example.com", "to": "bob@example.com"}
+  ],
+  "emailStatus": "DISABLED",
+  "emailResults": {},
+  "errors": [],
+  "timestamp": "2024-12-20T10:30:00"
+}
 ```
 
 ## 📋 API Reference
