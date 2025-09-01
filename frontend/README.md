@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Could you pl# Secret Santa Frontend
+
+This is a [Next.js](https://nextjs.org) frontend for the Secret Santa application, built with ShadCN/UI components.
 
 ## Getting Started
 
@@ -6,19 +8,37 @@ First, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Testing
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This project uses Vitest with React Testing Library for testing:
+
+```bash
+# Run tests once
+npm run test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with UI dashboard
+npm run test:ui
+
+# Run tests with coverage
+npm run test:coverage
+```
+
+## Building
+
+```bash
+# Build for production
+npm run build
+
+# Run linting
+npm run lint
+```
 
 ## Learn More
 
