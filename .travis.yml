@@ -1,6 +1,9 @@
 language: java
+dist: focal
 jdk:
   - openjdk21
+node_js:
+  - "20"
 notifications:
   email: false
 before_install:
@@ -8,4 +11,5 @@ before_install:
   - echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
 script:
   - ./mvnw clean install
+  - cd frontend && npm ci && npm run test && npm run build
   - ./mvnw deploy jib:build -P deploy-docker
