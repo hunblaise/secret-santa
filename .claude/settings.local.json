@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(java:*)",
+      "Bash(./mvnw:*)",
+      "Bash(curl:*)",
+      "Bash(chmod:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(rm:*)",
+      "Bash(export:*)",
+      "Bash(sudo apt:*)",
+      "Bash(sudo apt install:*)",
+      "Bash(docker:*)",
+      "Bash(grep:*)",
+      "Bash(whereis:*)"
+    ],
+    "deny": []
+  }
+}
