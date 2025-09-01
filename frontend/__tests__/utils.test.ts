@@ -14,7 +14,7 @@ describe('parseEmails', () => {
   })
 
   it('filters out empty lines and invalid emails', () => {
-    const input = 'john@example.com\n\ninvalid-email\njane@example.com\n   '
+    const input = 'john@example.com\n\ninvalid-email\njane@example.com\n   \nuser@domain\nuser..name@domain.com'
     const result = parseEmails(input)
     
     expect(result).toEqual([
@@ -34,12 +34,26 @@ describe('validateEmail', () => {
     expect(validateEmail('test@example.com')).toBe(true)
     expect(validateEmail('user.name@domain.co.uk')).toBe(true)
     expect(validateEmail('user+tag@example.org')).toBe(true)
+    expect(validateEmail('user_123@sub.domain.com')).toBe(true)
+    expect(validateEmail('firstName.lastName@company.co')).toBe(true)
   })
 
   it('rejects invalid email addresses', () => {
     expect(validateEmail('invalid')).toBe(false)
     expect(validateEmail('user@')).toBe(false)
     expect(validateEmail('@domain.com')).toBe(false)
+    expect(validateEmail('user..name@domain.com')).toBe(false)
+    expect(validateEmail('user@domain')).toBe(false)
+    expect(validateEmail('user name@domain.com')).toBe(false)
+    expect(validateEmail('user@domain..com')).toBe(false)
+    expect(validateEmail('')).toBe(false)
+  })
+
+  it('handles edge cases properly', () => {
+    expect(validateEmail('user@domain.c')).toBe(false)
+    expect(validateEmail('user@.domain.com')).toBe(false)
+    expect(validateEmail('user@domain.com.')).toBe(false)
+    expect(validateEmail('user@domain..com')).toBe(false)
   })
 })
 
