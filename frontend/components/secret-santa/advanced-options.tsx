@@ -1,11 +1,12 @@
 'use client'
 
-import React from 'react'
+import React, { useMemo, useCallback } from 'react'
 import { useFieldArray, UseFormReturn } from 'react-hook-form'
-import { Plus, Trash2, Users, Heart, Ban } from 'lucide-react'
+import { Plus, Trash2, Users, Heart, Ban, AlertTriangle } from 'lucide-react'
 
 import { FormData } from '@/lib/types'
 import { parseEmails } from '@/lib/utils'
+import { useToast } from '@/hooks/use-toast'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -13,14 +14,30 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/comp
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 interface AdvancedOptionsProps {
   form: UseFormReturn<FormData>
   emailsText: string
 }
 
+// Secure ID generation utility
+function generateSecureId(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID()
+  }
+  // Fallback for environments without crypto.randomUUID
+  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+}
+
 export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
-  const emails = parseEmails(emailsText)
+  const { toast } = useToast()
+  
+  // Memoize email parsing for performance
+  const emails = useMemo(() => {
+    if (!emailsText?.trim()) return []
+    return parseEmails(emailsText)
+  }, [emailsText])
 
   const {
     fields: exclusionFields,
@@ -49,28 +66,109 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
     name: 'nameMappings',
   })
 
-  const addExclusion = () => {
+  // Validation helpers
+  const validateNewExclusion = useCallback((from: string, to: string): string | null => {
+    if (from === to) return "You cannot exclude someone from themselves"
+    
+    const existing = exclusionFields.find(field => 
+      form.getValues(`exclusions.${exclusionFields.indexOf(field)}.from`) === from &&
+      form.getValues(`exclusions.${exclusionFields.indexOf(field)}.to`) === to
+    )
+    if (existing) return "This exclusion already exists"
+    
+    const conflictingPairing = forcedPairingFields.find(field => {
+      const idx = forcedPairingFields.indexOf(field)
+      return form.getValues(`forcedPairings.${idx}.from`) === from &&
+             form.getValues(`forcedPairings.${idx}.to`) === to
+    })
+    if (conflictingPairing) return "This conflicts with an existing forced pairing"
+    
+    return null
+  }, [exclusionFields, forcedPairingFields, form])
+  
+  const validateNewForcedPairing = useCallback((from: string, to: string): string | null => {
+    if (from === to) return "You cannot force someone to pair with themselves"
+    
+    const existing = forcedPairingFields.find(field => {
+      const idx = forcedPairingFields.indexOf(field)
+      return form.getValues(`forcedPairings.${idx}.from`) === from &&
+             form.getValues(`forcedPairings.${idx}.to`) === to
+    })
+    if (existing) return "This forced pairing already exists"
+    
+    const conflictingExclusion = exclusionFields.find(field => {
+      const idx = exclusionFields.indexOf(field)
+      return form.getValues(`exclusions.${idx}.from`) === from &&
+             form.getValues(`exclusions.${idx}.to`) === to
+    })
+    if (conflictingExclusion) return "This conflicts with an existing exclusion"
+    
+    return null
+  }, [exclusionFields, forcedPairingFields, form])
+
+  const validateNewNameMapping = useCallback((email: string, currentIndex: number): string | null => {
+    if (!email) return null
+    
+    const duplicate = nameMappingFields.find((field, idx) => {
+      if (idx === currentIndex) return false
+      return form.getValues(`nameMappings.${idx}.email`) === email
+    })
+    if (duplicate) return "This email already has a name mapping"
+    
+    return null
+  }, [nameMappingFields, form])
+
+  const addExclusion = useCallback(() => {
     appendExclusion({
-      id: Math.random().toString(36),
+      id: generateSecureId(),
       from: '',
       to: '',
     })
-  }
+  }, [appendExclusion])
 
-  const addForcedPairing = () => {
+  const addForcedPairing = useCallback(() => {
     appendForcedPairing({
-      id: Math.random().toString(36),
+      id: generateSecureId(),
       from: '',
       to: '',
     })
-  }
+  }, [appendForcedPairing])
 
-  const addNameMapping = () => {
+  const addNameMapping = useCallback(() => {
     appendNameMapping({
-      id: Math.random().toString(36),
+      id: generateSecureId(),
       email: '',
       name: '',
     })
+  }, [appendNameMapping])
+  
+  // Enhanced removal with validation
+  const handleRemoveExclusion = useCallback((index: number) => {
+    removeExclusion(index)
+    toast({ title: "Exclusion removed" })
+  }, [removeExclusion, toast])
+  
+  const handleRemoveForcedPairing = useCallback((index: number) => {
+    removeForcedPairing(index) 
+    toast({ title: "Forced pairing removed" })
+  }, [removeForcedPairing, toast])
+  
+  const handleRemoveNameMapping = useCallback((index: number) => {
+    removeNameMapping(index)
+    toast({ title: "Name mapping removed" })
+  }, [removeNameMapping, toast])
+
+  // Input validation and defensive programming (after hooks)
+  if (!form) {
+    console.error('AdvancedOptions: form prop is required')
+    return (
+      <Alert variant="destructive">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertDescription>
+          Form configuration error. Please refresh the page.
+        </AlertDescription>
+      </Alert>
+    )
   }
 
   if (emails.length === 0) {
@@ -116,7 +214,17 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
                   render={({ field }) => (
                     <FormItem className="flex-1">
                       <FormLabel>From</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={(value) => {
+                        field.onChange(value)
+                        // Validate on change
+                        const toValue = form.getValues(`exclusions.${index}.to`)
+                        if (value && toValue) {
+                          const error = validateNewExclusion(value, toValue)
+                          if (error) {
+                            toast({ title: "Validation Error", description: error, variant: "destructive" })
+                          }
+                        }
+                      }} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select giver" />
@@ -143,7 +251,17 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
                   render={({ field }) => (
                     <FormItem className="flex-1">
                       <FormLabel>To</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={(value) => {
+                        field.onChange(value)
+                        // Validate on change
+                        const fromValue = form.getValues(`exclusions.${index}.from`)
+                        if (fromValue && value) {
+                          const error = validateNewExclusion(fromValue, value)
+                          if (error) {
+                            toast({ title: "Validation Error", description: error, variant: "destructive" })
+                          }
+                        }
+                      }} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select receiver" />
@@ -166,7 +284,8 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
                   type="button"
                   variant="outline"
                   size="icon"
-                  onClick={() => removeExclusion(index)}
+                  onClick={() => handleRemoveExclusion(index)}
+                  aria-label={`Remove exclusion rule ${index + 1}`}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -178,6 +297,7 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
               variant="outline"
               onClick={addExclusion}
               className="w-full"
+              aria-label="Add new exclusion rule"
             >
               <Plus className="mr-2 h-4 w-4" />
               Add Exclusion
@@ -203,7 +323,17 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
                   render={({ field }) => (
                     <FormItem className="flex-1">
                       <FormLabel>From</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={(value) => {
+                        field.onChange(value)
+                        // Validate on change
+                        const toValue = form.getValues(`forcedPairings.${index}.to`)
+                        if (value && toValue) {
+                          const error = validateNewForcedPairing(value, toValue)
+                          if (error) {
+                            toast({ title: "Validation Error", description: error, variant: "destructive" })
+                          }
+                        }
+                      }} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select giver" />
@@ -230,7 +360,17 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
                   render={({ field }) => (
                     <FormItem className="flex-1">
                       <FormLabel>To</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={(value) => {
+                        field.onChange(value)
+                        // Validate on change
+                        const fromValue = form.getValues(`forcedPairings.${index}.from`)
+                        if (fromValue && value) {
+                          const error = validateNewForcedPairing(fromValue, value)
+                          if (error) {
+                            toast({ title: "Validation Error", description: error, variant: "destructive" })
+                          }
+                        }
+                      }} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select receiver" />
@@ -253,7 +393,8 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
                   type="button"
                   variant="outline"
                   size="icon"
-                  onClick={() => removeForcedPairing(index)}
+                  onClick={() => handleRemoveForcedPairing(index)}
+                  aria-label={`Remove forced pairing ${index + 1}`}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -265,6 +406,7 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
               variant="outline"
               onClick={addForcedPairing}
               className="w-full"
+              aria-label="Add new forced pairing rule"
             >
               <Plus className="mr-2 h-4 w-4" />
               Add Forced Pairing
@@ -290,7 +432,16 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
                   render={({ field }) => (
                     <FormItem className="flex-1">
                       <FormLabel>Email</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={(value) => {
+                        field.onChange(value)
+                        // Validate on change
+                        if (value) {
+                          const error = validateNewNameMapping(value, index)
+                          if (error) {
+                            toast({ title: "Validation Error", description: error, variant: "destructive" })
+                          }
+                        }
+                      }} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select email" />
@@ -327,7 +478,8 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
                   type="button"
                   variant="outline"
                   size="icon"
-                  onClick={() => removeNameMapping(index)}
+                  onClick={() => handleRemoveNameMapping(index)}
+                  aria-label={`Remove name mapping ${index + 1}`}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -339,6 +491,7 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
               variant="outline"
               onClick={addNameMapping}
               className="w-full"
+              aria-label="Add new name mapping"
             >
               <Plus className="mr-2 h-4 w-4" />
               Add Name Mapping
