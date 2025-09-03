@@ -47,3 +47,19 @@ export interface NameMapping {
   email: string;
   name: string;
 }
+
+// Error response interfaces for robust error handling
+export interface ApiErrorResponse {
+  message?: string;
+  error?: string;
+  details?: string;
+  timestamp?: string;
+  path?: string;
+  status?: number;
+}
+
+export interface ApiError {
+  message: string;
+  status?: number;
+  code?: string;
+}
