@@ -68,7 +68,6 @@ export function SecretSantaForm({ onResults, isLoading, setIsLoading }: SecretSa
   })
 
   const emailsText = form.watch('emailsText')
-  const sendEmails = form.watch('sendEmails')
   const emailCount = parseEmails(emailsText || '').length
 
   const onSubmit = async (data: FormData) => {
@@ -83,10 +82,10 @@ export function SecretSantaForm({ onResults, isLoading, setIsLoading }: SecretSa
         title: "Success! 🎁",
         description: `Generated ${results.pairs.length} Secret Santa pairs`,
       })
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error.message || 'Failed to generate Secret Santa pairs',
+        description: (error as Error).message || 'Failed to generate Secret Santa pairs',
         variant: "destructive",
       })
     } finally {

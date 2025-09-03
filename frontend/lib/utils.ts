@@ -23,30 +23,36 @@ export function buildSecretSantaRequest(formData: FormData): SecretSantaRequest 
   
   // Build exclusions map
   const exclusions: Record<string, string[]> = {}
-  formData.exclusions.forEach(exclusion => {
-    if (exclusion.from && exclusion.to) {
-      if (!exclusions[exclusion.from]) {
-        exclusions[exclusion.from] = []
+  if (formData.exclusions) {
+    formData.exclusions.forEach(exclusion => {
+      if (exclusion.from && exclusion.to) {
+        if (!exclusions[exclusion.from]) {
+          exclusions[exclusion.from] = []
+        }
+        exclusions[exclusion.from].push(exclusion.to)
       }
-      exclusions[exclusion.from].push(exclusion.to)
-    }
-  })
+    })
+  }
   
   // Build mappings map
   const mappings: Record<string, string> = {}
-  formData.nameMappings.forEach(mapping => {
-    if (mapping.email && mapping.name) {
-      mappings[mapping.email] = mapping.name
-    }
-  })
+  if (formData.nameMappings) {
+    formData.nameMappings.forEach(mapping => {
+      if (mapping.email && mapping.name) {
+        mappings[mapping.email] = mapping.name
+      }
+    })
+  }
   
   // Build cheats map
   const cheats: Record<string, string> = {}
-  formData.forcedPairings.forEach(pairing => {
-    if (pairing.from && pairing.to) {
-      cheats[pairing.from] = pairing.to
-    }
-  })
+  if (formData.forcedPairings) {
+    formData.forcedPairings.forEach(pairing => {
+      if (pairing.from && pairing.to) {
+        cheats[pairing.from] = pairing.to
+      }
+    })
+  }
   
   return {
     emails,

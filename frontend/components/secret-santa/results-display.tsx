@@ -9,7 +9,6 @@ import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 interface ResultsDisplayProps {
@@ -49,7 +48,7 @@ export function ResultsDisplay({ results, onReset }: ResultsDisplayProps) {
         title: "Copied!",
         description: "Pairs copied to clipboard",
       })
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to copy pairs",

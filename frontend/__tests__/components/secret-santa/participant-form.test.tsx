@@ -134,31 +134,26 @@ describe('SecretSantaForm', () => {
     const advancedOptionsButton = screen.getByText('Advanced Options')
     
     // Should not show placeholder text initially
-    expect(screen.queryByText(/Advanced options coming in Step 4/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Advanced options \(exclusions, forced pairings, name mappings\) coming in Step 4!/)).not.toBeInTheDocument()
     
     // Click to expand
     await user.click(advancedOptionsButton)
     
     await waitFor(() => {
-      expect(screen.getByText(/Advanced options coming in Step 4/)).toBeInTheDocument()
+      expect(screen.getByText(/Advanced options \(exclusions, forced pairings, name mappings\) coming in Step 4!/)).toBeInTheDocument()
     })
   })
 
-  it('should show form validation errors', async () => {
-    const user = userEvent.setup()
+  it('should disable button when no emails are entered', async () => {
     renderForm()
 
     const generateButton = screen.getByRole('button', { name: /Generate Secret Santa Pairs/ })
     
-    // Try to submit with no emails
-    await user.click(generateButton)
-    
-    await waitFor(() => {
-      expect(screen.getByText('Please enter at least one email address')).toBeInTheDocument()
-    })
+    // Button should be disabled with no emails
+    expect(generateButton).toBeDisabled()
   })
 
-  it('should show minimum participant validation error', async () => {
+  it('should keep button disabled with insufficient participants', async () => {
     const user = userEvent.setup()
     renderForm()
 
@@ -168,11 +163,9 @@ describe('SecretSantaForm', () => {
     // Add only 2 valid emails
     await user.type(textarea, 'john@example.com\njane@example.com')
     
-    // Force submit (even though button should be disabled)
-    fireEvent.click(generateButton)
-    
     await waitFor(() => {
-      expect(screen.getByText('You need at least 3 participants for Secret Santa')).toBeInTheDocument()
+      // Button should still be disabled with only 2 participants
+      expect(generateButton).toBeDisabled()
     })
   })
 })

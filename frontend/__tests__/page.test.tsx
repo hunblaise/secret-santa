@@ -1,6 +1,20 @@
 import { render, screen } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import Home from '../app/page'
+
+// Mock the Secret Santa components
+vi.mock('../components/secret-santa/participant-form', () => ({
+  SecretSantaForm: () => <div data-testid="secret-santa-form">Secret Santa Form</div>
+}))
+
+vi.mock('../components/secret-santa/results-display', () => ({
+  ResultsDisplay: () => <div data-testid="results-display">Results Display</div>
+}))
+
+// Mock the toast hook
+vi.mock('../hooks/use-toast', () => ({
+  useToast: () => ({ toast: vi.fn() })
+}))
 
 describe('Home Page', () => {
   it('renders the main content', () => {
@@ -10,18 +24,20 @@ describe('Home Page', () => {
     expect(main).toBeInTheDocument()
   })
 
-  it('renders the Next.js logo', () => {
+  it('renders the Secret Santa header', () => {
     render(<Home />)
     
-    const logo = screen.getByAltText('Next.js logo')
-    expect(logo).toBeInTheDocument()
+    const heading = screen.getByText('Secret Santa Generator')
+    expect(heading).toBeInTheDocument()
+    
+    const description = screen.getByText('Create magical gift exchanges with advanced pairing options')
+    expect(description).toBeInTheDocument()
   })
 
-  it('shows deploy button', () => {
+  it('shows the Secret Santa form by default', () => {
     render(<Home />)
     
-    const deployLink = screen.getByRole('link', { name: /deploy now/i })
-    expect(deployLink).toBeInTheDocument()
-    expect(deployLink).toHaveAttribute('href', expect.stringContaining('vercel.com'))
+    const form = screen.getByTestId('secret-santa-form')
+    expect(form).toBeInTheDocument()
   })
 })

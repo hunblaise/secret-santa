@@ -25,9 +25,9 @@ export interface SecretSantaResponse {
 export interface FormData {
   emailsText: string;
   sendEmails: boolean;
-  exclusions: ExclusionRule[];
-  forcedPairings: ForcedPairing[];
-  nameMappings: NameMapping[];
+  exclusions?: ExclusionRule[];
+  forcedPairings?: ForcedPairing[];
+  nameMappings?: NameMapping[];
 }
 
 export interface ExclusionRule {

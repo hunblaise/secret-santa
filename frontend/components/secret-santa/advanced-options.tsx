@@ -1,16 +1,14 @@
 'use client'
 
 import React from 'react'
-import { UseFormReturn } from 'react-hook-form'
 import { Settings } from 'lucide-react'
-import { FormData } from '@/lib/types'
 
 interface AdvancedOptionsProps {
-  form: UseFormReturn<FormData>
-  emailsText: string
+  form?: unknown
+  emailsText?: string
 }
 
-export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
+export function AdvancedOptions({ }: AdvancedOptionsProps) {
   return (
     <div className="text-center py-8 text-muted-foreground">
       <Settings className="h-12 w-12 mx-auto mb-4 opacity-50" />
