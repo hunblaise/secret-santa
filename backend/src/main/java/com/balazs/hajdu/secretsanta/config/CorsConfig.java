@@ -21,7 +21,7 @@ import org.springframework.web.cors.reactive.CorsWebFilter;
 @Configuration
 public class CorsConfig {
 
-    @Value("${app.cors.allowed-origins:http://localhost:3000}")
+    @Value("${app.cors.allowed-origins}")
     private String allowedOrigins;
 
     @Value("${app.cors.allowed-methods:GET,POST,PUT,DELETE,OPTIONS}")
