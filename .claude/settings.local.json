@@ -14,7 +14,9 @@
       "Bash(docker:*)",
       "Bash(grep:*)",
       "Bash(whereis:*)",
-      "Bash(npm run test:*)"
+      "Bash(npm run test:*)",
+      "WebSearch",
+      "Bash(npm run dev:*)"
     ],
     "deny": []
   }
