@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -297,11 +297,14 @@ describe('AdvancedOptions Component - Focused Tests', () => {
 
     it('supports keyboard navigation for tabs', async () => {
       render(<TestWrapper />)
-      
+
       const forcedPairsTab = screen.getByRole('tab', { name: /forced pairs/i })
-      
-      // Test keyboard focus
-      forcedPairsTab.focus()
+
+      // Test keyboard focus - wrap in act() to handle state updates
+      act(() => {
+        forcedPairsTab.focus()
+      })
+
       expect(forcedPairsTab).toHaveFocus()
     })
   })
