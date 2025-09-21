@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useMemo, useCallback } from 'react'
-import { useFieldArray, UseFormReturn } from 'react-hook-form'
+import { useFieldArray, UseFormReturn, useForm } from 'react-hook-form'
 import { Plus, Trash2, Users, Heart, Ban, AlertTriangle } from 'lucide-react'
 
 import { FormData } from '@/lib/types'
@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
 interface AdvancedOptionsProps {
-  form: UseFormReturn<FormData>
+  form: UseFormReturn<FormData> | null
   emailsText: string
 }
 
@@ -32,31 +32,35 @@ function generateSecureId(): string {
 
 export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
   const { toast } = useToast()
-  
+
   // Memoize email parsing for performance
   const emails = useMemo(() => {
     if (!emailsText?.trim()) return []
     return parseEmails(emailsText)
   }, [emailsText])
 
-  if (!form) {
-    console.error('AdvancedOptions: form prop is required')
-    return (
-      <Alert variant="destructive">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertDescription>
-          Form configuration error. Please refresh the page.
-        </AlertDescription>
-      </Alert>
-    )
-  }
+  // Provide a stable fallback form when no form instance is supplied
+  const fallbackForm = useForm<FormData>({
+    defaultValues: {
+      emailsText: '',
+      sendEmails: false,
+      exclusions: [],
+      forcedPairings: [],
+      nameMappings: [],
+    },
+  })
 
+  const activeForm = form ?? fallbackForm
+  const isFallbackForm = form == null
+
+
+  // Move all hooks to top before any conditional returns
   const {
     fields: exclusionFields,
     append: appendExclusion,
     remove: removeExclusion,
   } = useFieldArray({
-    control: form.control,
+    control: activeForm.control,
     name: 'exclusions',
   })
 
@@ -65,7 +69,7 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
     append: appendForcedPairing,
     remove: removeForcedPairing,
   } = useFieldArray({
-    control: form.control,
+    control: activeForm.control,
     name: 'forcedPairings',
   })
 
@@ -74,66 +78,70 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
     append: appendNameMapping,
     remove: removeNameMapping,
   } = useFieldArray({
-    control: form.control,
+    control: activeForm.control,
     name: 'nameMappings',
   })
 
+  // Move all useCallback hooks to top before any conditional returns
   // Validation helpers
   const validateNewExclusion = useCallback((from: string, to: string, currentIndex?: number): string | null => {
+    if (isFallbackForm) return null
     if (from === to) return "You cannot exclude someone from themselves"
 
     const existing = exclusionFields.find(field => {
       const idx = exclusionFields.indexOf(field)
       // Skip validation against the current field being edited
       if (currentIndex !== undefined && idx === currentIndex) return false
-      return form.getValues(`exclusions.${idx}.from`) === from &&
-             form.getValues(`exclusions.${idx}.to`) === to
+      return activeForm.getValues(`exclusions.${idx}.from`) === from &&
+             activeForm.getValues(`exclusions.${idx}.to`) === to
     })
     if (existing) return "This exclusion already exists"
 
     const conflictingPairing = forcedPairingFields.find(field => {
       const idx = forcedPairingFields.indexOf(field)
-      return form.getValues(`forcedPairings.${idx}.from`) === from &&
-             form.getValues(`forcedPairings.${idx}.to`) === to
+      return activeForm.getValues(`forcedPairings.${idx}.from`) === from &&
+             activeForm.getValues(`forcedPairings.${idx}.to`) === to
     })
     if (conflictingPairing) return "This conflicts with an existing forced pairing"
 
     return null
-  }, [exclusionFields, forcedPairingFields, form])
+  }, [activeForm, exclusionFields, forcedPairingFields, isFallbackForm])
   
   const validateNewForcedPairing = useCallback((from: string, to: string, currentIndex?: number): string | null => {
+    if (isFallbackForm) return null
     if (from === to) return "You cannot force someone to pair with themselves"
 
     const existing = forcedPairingFields.find(field => {
       const idx = forcedPairingFields.indexOf(field)
       // Skip validation against the current field being edited
       if (currentIndex !== undefined && idx === currentIndex) return false
-      return form.getValues(`forcedPairings.${idx}.from`) === from &&
-             form.getValues(`forcedPairings.${idx}.to`) === to
+      return activeForm.getValues(`forcedPairings.${idx}.from`) === from &&
+             activeForm.getValues(`forcedPairings.${idx}.to`) === to
     })
     if (existing) return "This forced pairing already exists"
 
     const conflictingExclusion = exclusionFields.find(field => {
       const idx = exclusionFields.indexOf(field)
-      return form.getValues(`exclusions.${idx}.from`) === from &&
-             form.getValues(`exclusions.${idx}.to`) === to
+      return activeForm.getValues(`exclusions.${idx}.from`) === from &&
+             activeForm.getValues(`exclusions.${idx}.to`) === to
     })
     if (conflictingExclusion) return "This conflicts with an existing exclusion"
 
     return null
-  }, [exclusionFields, forcedPairingFields, form])
+  }, [activeForm, exclusionFields, forcedPairingFields, isFallbackForm])
 
   const validateNewNameMapping = useCallback((email: string, currentIndex: number): string | null => {
+    if (isFallbackForm) return null
     if (!email) return null
-    
+
     const duplicate = nameMappingFields.find((field, idx) => {
       if (idx === currentIndex) return false
-      return form.getValues(`nameMappings.${idx}.email`) === email
+      return activeForm.getValues(`nameMappings.${idx}.email`) === email
     })
     if (duplicate) return "This email already has a name mapping"
-    
+
     return null
-  }, [nameMappingFields, form])
+  }, [activeForm, isFallbackForm, nameMappingFields])
 
   const addExclusion = useCallback(() => {
     appendExclusion({
@@ -175,6 +183,19 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
     toast({ title: "Name mapping removed" })
   }, [removeNameMapping, toast])
 
+  // Handle null form case after all hooks are called
+  if (isFallbackForm) {
+    console.error('AdvancedOptions: form prop is required')
+    return (
+      <Alert variant="destructive">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertDescription>
+          Form configuration error. Please refresh the page.
+        </AlertDescription>
+      </Alert>
+    )
+  }
+
   if (emails.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -213,7 +234,7 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
             {exclusionFields.map((field, index) => (
               <div key={field.id} className="flex items-end gap-2">
                 <FormField
-                  control={form.control}
+                  control={activeForm.control}
                   name={`exclusions.${index}.from`}
                   render={({ field }) => (
                     <FormItem className="flex-1">
@@ -221,7 +242,7 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
                       <Select onValueChange={(value) => {
                         field.onChange(value)
                         // Validate on change
-                        const toValue = form.getValues(`exclusions.${index}.to`)
+                        const toValue = activeForm.getValues(`exclusions.${index}.to`)
                         if (value && toValue) {
                           const error = validateNewExclusion(value, toValue, index)
                           if (error) {
@@ -250,7 +271,7 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
                 <div className="text-muted-foreground pb-2">cannot give to</div>
                 
                 <FormField
-                  control={form.control}
+                  control={activeForm.control}
                   name={`exclusions.${index}.to`}
                   render={({ field }) => (
                     <FormItem className="flex-1">
@@ -258,7 +279,7 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
                       <Select onValueChange={(value) => {
                         field.onChange(value)
                         // Validate on change
-                        const fromValue = form.getValues(`exclusions.${index}.from`)
+                        const fromValue = activeForm.getValues(`exclusions.${index}.from`)
                         if (fromValue && value) {
                           const error = validateNewExclusion(fromValue, value, index)
                           if (error) {
@@ -322,7 +343,7 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
             {forcedPairingFields.map((field, index) => (
               <div key={field.id} className="flex items-end gap-2">
                 <FormField
-                  control={form.control}
+                  control={activeForm.control}
                   name={`forcedPairings.${index}.from`}
                   render={({ field }) => (
                     <FormItem className="flex-1">
@@ -330,7 +351,7 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
                       <Select onValueChange={(value) => {
                         field.onChange(value)
                         // Validate on change
-                        const toValue = form.getValues(`forcedPairings.${index}.to`)
+                        const toValue = activeForm.getValues(`forcedPairings.${index}.to`)
                         if (value && toValue) {
                           const error = validateNewForcedPairing(value, toValue, index)
                           if (error) {
@@ -359,7 +380,7 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
                 <div className="text-muted-foreground pb-2">must give to</div>
                 
                 <FormField
-                  control={form.control}
+                  control={activeForm.control}
                   name={`forcedPairings.${index}.to`}
                   render={({ field }) => (
                     <FormItem className="flex-1">
@@ -367,7 +388,7 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
                       <Select onValueChange={(value) => {
                         field.onChange(value)
                         // Validate on change
-                        const fromValue = form.getValues(`forcedPairings.${index}.from`)
+                        const fromValue = activeForm.getValues(`forcedPairings.${index}.from`)
                         if (fromValue && value) {
                           const error = validateNewForcedPairing(fromValue, value, index)
                           if (error) {
@@ -431,7 +452,7 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
             {nameMappingFields.map((field, index) => (
               <div key={field.id} className="flex items-end gap-2">
                 <FormField
-                  control={form.control}
+                  control={activeForm.control}
                   name={`nameMappings.${index}.email`}
                   render={({ field }) => (
                     <FormItem className="flex-1">
@@ -465,7 +486,7 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
                 />
                 
                 <FormField
-                  control={form.control}
+                  control={activeForm.control}
                   name={`nameMappings.${index}.name`}
                   render={({ field }) => (
                     <FormItem className="flex-1">
