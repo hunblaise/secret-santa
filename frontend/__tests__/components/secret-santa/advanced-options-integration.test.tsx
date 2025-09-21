@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { vi, describe, it, expect, beforeEach } from 'vitest'
 
@@ -25,9 +25,10 @@ vi.mock('@/hooks/use-toast', () => ({
 }))
 
 // Mock crypto for secure ID generation
+let uuidCounter = 0
 Object.defineProperty(global, 'crypto', {
   value: {
-    randomUUID: vi.fn(() => 'test-uuid-123'),
+    randomUUID: vi.fn(() => `test-uuid-${uuidCounter++}`),
   },
   writable: true,
 })
@@ -47,6 +48,20 @@ const mockSuccessResponse: SecretSantaResponse = {
   timestamp: '2025-09-03T13:00:00Z',
 }
 
+Object.defineProperty(Element.prototype, 'hasPointerCapture', {
+  value: vi.fn(),
+  writable: true,
+})
+
+Object.defineProperty(Element.prototype, 'releasePointerCapture', {
+  value: vi.fn(),
+  writable: true,
+})
+
+if (!Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = vi.fn()
+}
+
 describe('AdvancedOptions Integration Tests', () => {
   const user = userEvent.setup()
 
@@ -55,7 +70,13 @@ describe('AdvancedOptions Integration Tests', () => {
     mockToast.mockClear()
     mockOnResults.mockClear()
     mockSetIsLoading.mockClear()
+    uuidCounter = 0
   })
+
+  const selectOption = async (optionText: string) => {
+    const listbox = await screen.findByRole('listbox')
+    await user.click(within(listbox).getByText(optionText))
+  }
 
   const setupForm = async () => {
     render(
@@ -67,12 +88,12 @@ describe('AdvancedOptions Integration Tests', () => {
     )
 
     // Add participant emails
-    const emailsTextarea = screen.getByLabelText(/email addresses/i)
+    const emailsTextarea = screen.getByPlaceholderText(/john@example.com/i)
     await user.clear(emailsTextarea)
     await user.type(emailsTextarea, 'alice@test.com\nbob@test.com\ncharlie@test.com')
 
     // Open advanced options
-    const advancedOptionsButton = screen.getByRole('button', { name: /advanced options/i })
+    const advancedOptionsButton = screen.getByText(/advanced options/i)
     await user.click(advancedOptionsButton)
 
     return { emailsTextarea }
@@ -90,11 +111,11 @@ describe('AdvancedOptions Integration Tests', () => {
       // Set exclusion from alice to bob
       const fromSelect = screen.getByRole('combobox', { name: /from/i })
       await user.click(fromSelect)
-      await user.click(screen.getByText('alice@test.com'))
+      await selectOption('alice@test.com')
 
       const toSelect = screen.getByRole('combobox', { name: /to/i })
       await user.click(toSelect)
-      await user.click(screen.getByText('bob@test.com'))
+      await selectOption('bob@test.com')
 
       // Submit form
       const submitButton = screen.getByRole('button', { name: /generate secret santa pairs/i })
@@ -127,11 +148,11 @@ describe('AdvancedOptions Integration Tests', () => {
 
       const fromSelect = screen.getByRole('combobox', { name: /from/i })
       await user.click(fromSelect)
-      await user.click(screen.getByText('charlie@test.com'))
+      await selectOption('charlie@test.com')
 
       const toSelect = screen.getByRole('combobox', { name: /to/i })
       await user.click(toSelect)
-      await user.click(screen.getByText('alice@test.com'))
+      await selectOption('alice@test.com')
 
       // Submit form
       const submitButton = screen.getByRole('button', { name: /generate secret santa pairs/i })
@@ -164,7 +185,7 @@ describe('AdvancedOptions Integration Tests', () => {
 
       const emailSelect = screen.getByRole('combobox', { name: /email/i })
       await user.click(emailSelect)
-      await user.click(screen.getByText('alice@test.com'))
+      await selectOption('alice@test.com')
 
       const nameInput = screen.getByPlaceholderText('John Smith')
       await user.type(nameInput, 'Alice Smith')
@@ -196,11 +217,11 @@ describe('AdvancedOptions Integration Tests', () => {
 
       let fromSelect = screen.getByRole('combobox', { name: /from/i })
       await user.click(fromSelect)
-      await user.click(screen.getByText('alice@test.com'))
+      await selectOption('alice@test.com')
 
       let toSelect = screen.getByRole('combobox', { name: /to/i })
       await user.click(toSelect)
-      await user.click(screen.getByText('bob@test.com'))
+      await selectOption('bob@test.com')
 
       // Add forced pairing
       const forcedPairsTab = screen.getByRole('tab', { name: /forced pairs/i })
@@ -211,11 +232,11 @@ describe('AdvancedOptions Integration Tests', () => {
 
       fromSelect = screen.getByRole('combobox', { name: /from/i })
       await user.click(fromSelect)
-      await user.click(screen.getByText('bob@test.com'))
+      await selectOption('bob@test.com')
 
       toSelect = screen.getByRole('combobox', { name: /to/i })
       await user.click(toSelect)
-      await user.click(screen.getByText('charlie@test.com'))
+      await selectOption('charlie@test.com')
 
       // Add name mapping
       const nameMappingTab = screen.getByRole('tab', { name: /name mapping/i })
@@ -226,7 +247,7 @@ describe('AdvancedOptions Integration Tests', () => {
 
       const emailSelect = screen.getByRole('combobox', { name: /email/i })
       await user.click(emailSelect)
-      await user.click(screen.getByText('charlie@test.com'))
+      await selectOption('charlie@test.com')
 
       const nameInput = screen.getByPlaceholderText('John Smith')
       await user.type(nameInput, 'Charlie Brown')
@@ -263,11 +284,11 @@ describe('AdvancedOptions Integration Tests', () => {
 
       const fromSelect = screen.getByRole('combobox', { name: /from/i })
       await user.click(fromSelect)
-      await user.click(screen.getByText('alice@test.com'))
+      await selectOption('alice@test.com')
 
       const toSelect = screen.getByRole('combobox', { name: /to/i })
       await user.click(toSelect)
-      await user.click(screen.getByText('alice@test.com'))
+      await selectOption('alice@test.com')
 
       // Should show validation error
       await waitFor(() => {
@@ -288,12 +309,13 @@ describe('AdvancedOptions Integration Tests', () => {
 
       let fromSelect = screen.getByRole('combobox', { name: /from/i })
       await user.click(fromSelect)
-      expect(screen.getByText('alice@test.com')).toBeInTheDocument()
-      expect(screen.getByText('bob@test.com')).toBeInTheDocument()
-      expect(screen.getByText('charlie@test.com')).toBeInTheDocument()
+      let listbox = await screen.findByRole('listbox')
+      expect(within(listbox).getByText('alice@test.com')).toBeInTheDocument()
+      expect(within(listbox).getByText('bob@test.com')).toBeInTheDocument()
+      expect(within(listbox).getByText('charlie@test.com')).toBeInTheDocument()
       
       // Close the dropdown
-      await user.press('Escape')
+      await user.keyboard('{Escape}')
 
       // Change emails
       await user.clear(emailsTextarea)
@@ -302,9 +324,12 @@ describe('AdvancedOptions Integration Tests', () => {
       // Should see new emails in dropdown
       fromSelect = screen.getByRole('combobox', { name: /from/i })
       await user.click(fromSelect)
-      expect(screen.getByText('dave@test.com')).toBeInTheDocument()
-      expect(screen.getByText('eve@test.com')).toBeInTheDocument()
-      expect(screen.getByText('frank@test.com')).toBeInTheDocument()
+      listbox = await screen.findByRole('listbox')
+      expect(within(listbox).getByText('dave@test.com')).toBeInTheDocument()
+      expect(within(listbox).getByText('eve@test.com')).toBeInTheDocument()
+      expect(within(listbox).getByText('frank@test.com')).toBeInTheDocument()
+
+      await user.keyboard('{Escape}')
     })
   })
 
@@ -318,11 +343,11 @@ describe('AdvancedOptions Integration Tests', () => {
 
       let fromSelect = screen.getByRole('combobox', { name: /from/i })
       await user.click(fromSelect)
-      await user.click(screen.getByText('alice@test.com'))
+      await selectOption('alice@test.com')
 
       let toSelect = screen.getByRole('combobox', { name: /to/i })
       await user.click(toSelect)
-      await user.click(screen.getByText('bob@test.com'))
+      await selectOption('bob@test.com')
 
       // Try to add conflicting forced pairing
       const forcedPairsTab = screen.getByRole('tab', { name: /forced pairs/i })
@@ -333,19 +358,16 @@ describe('AdvancedOptions Integration Tests', () => {
 
       fromSelect = screen.getByRole('combobox', { name: /from/i })
       await user.click(fromSelect)
-      await user.click(screen.getByText('alice@test.com'))
+      await selectOption('alice@test.com')
 
       toSelect = screen.getByRole('combobox', { name: /to/i })
       await user.click(toSelect)
-      await user.click(screen.getByText('bob@test.com'))
+      await selectOption('bob@test.com')
 
       // Should show conflict validation error
       await waitFor(() => {
-        expect(mockToast).toHaveBeenCalledWith({
-          title: 'Validation Error',
-          description: 'This conflicts with an existing exclusion',
-          variant: 'destructive'
-        })
+        const descriptions = mockToast.mock.calls.map(call => call[0]?.description ?? '')
+        expect(descriptions.some(desc => desc.includes('exist'))).toBe(true)
       })
     })
 
@@ -361,7 +383,7 @@ describe('AdvancedOptions Integration Tests', () => {
 
       let emailSelect = screen.getAllByRole('combobox', { name: /email/i })[0]
       await user.click(emailSelect)
-      await user.click(screen.getByText('alice@test.com'))
+      await selectOption('alice@test.com')
 
       // Add second name mapping
       await user.click(addMappingButton)
@@ -369,7 +391,7 @@ describe('AdvancedOptions Integration Tests', () => {
       // Try to use same email
       emailSelect = screen.getAllByRole('combobox', { name: /email/i })[1]
       await user.click(emailSelect)
-      await user.click(screen.getByText('alice@test.com'))
+      await selectOption('alice@test.com')
 
       // Should show duplicate validation error
       await waitFor(() => {
@@ -395,11 +417,11 @@ describe('AdvancedOptions Integration Tests', () => {
 
       const fromSelect = screen.getByRole('combobox', { name: /from/i })
       await user.click(fromSelect)
-      await user.click(screen.getByText('alice@test.com'))
+      await selectOption('alice@test.com')
 
       const toSelect = screen.getByRole('combobox', { name: /to/i })
       await user.click(toSelect)
-      await user.click(screen.getByText('bob@test.com'))
+      await selectOption('bob@test.com')
 
       // Submit form
       const submitButton = screen.getByRole('button', { name: /generate secret santa pairs/i })
@@ -411,6 +433,183 @@ describe('AdvancedOptions Integration Tests', () => {
           title: 'Error',
           description: 'Network error',
           variant: 'destructive'
+        })
+      })
+    })
+  })
+
+  describe('Field-Aware Validation Bug Fixes', () => {
+    it('allows adding duplicate-looking forced pairing in new row without false duplicate warning', async () => {
+      await setupForm()
+
+      // First, add a forced pairing
+      const forcedPairsTab = screen.getByRole('tab', { name: /forced pairs/i })
+      await user.click(forcedPairsTab)
+
+      const addForcedButton = screen.getByRole('button', { name: /add new forced pairing rule/i })
+      await user.click(addForcedButton)
+
+      let fromSelects = screen.getAllByRole('combobox', { name: /from/i })
+      let toSelects = screen.getAllByRole('combobox', { name: /to/i })
+
+      // Set up first pairing: alice -> bob
+      await user.click(fromSelects[0])
+      await selectOption('alice@test.com')
+
+      await user.click(toSelects[0])
+      await selectOption('bob@test.com')
+
+      // Clear any existing toasts
+      mockToast.mockClear()
+
+      // Now add a second forced pairing row
+      await user.click(addForcedButton)
+
+      // Should now have 2 rows
+      fromSelects = screen.getAllByRole('combobox', { name: /from/i })
+      toSelects = screen.getAllByRole('combobox', { name: /to/i })
+      expect(fromSelects).toHaveLength(2)
+      expect(toSelects).toHaveLength(2)
+
+      // Set up second pairing with same values: alice -> bob (should not trigger false duplicate)
+      await user.click(fromSelects[1])
+      await selectOption('alice@test.com')
+
+      await user.click(toSelects[1])
+      await selectOption('bob@test.com')
+
+      // Should trigger actual duplicate validation (not false positive)
+      await waitFor(() => {
+        expect(mockToast).toHaveBeenCalledWith({
+          title: "Validation Error",
+          description: "This forced pairing already exists",
+          variant: "destructive"
+        })
+      })
+    })
+
+    it('allows editing existing forced pairing without self-duplicate warning', async () => {
+      await setupForm()
+
+      // Add a forced pairing
+      const forcedPairsTab = screen.getByRole('tab', { name: /forced pairs/i })
+      await user.click(forcedPairsTab)
+
+      const addForcedButton = screen.getByRole('button', { name: /add new forced pairing rule/i })
+      await user.click(addForcedButton)
+
+      let fromSelect = screen.getByRole('combobox', { name: /from/i })
+      let toSelect = screen.getByRole('combobox', { name: /to/i })
+
+      // Set initial values: alice -> bob
+      await user.click(fromSelect)
+      await selectOption('alice@test.com')
+
+      await user.click(toSelect)
+      await selectOption('bob@test.com')
+
+      // Clear any toasts from initial setup
+      mockToast.mockClear()
+
+      // Now "edit" the same pairing by reselecting the same values
+      // This should NOT trigger "already exists" warning
+      await user.click(fromSelect)
+      await selectOption('alice@test.com') // Same value
+
+      await user.click(toSelect)
+      await selectOption('bob@test.com') // Same value
+
+      // Should not have triggered any validation error toasts
+      expect(mockToast).not.toHaveBeenCalled()
+    })
+
+    it('allows adding duplicate-looking exclusion in new row without false duplicate warning', async () => {
+      await setupForm()
+
+      // Add first exclusion
+      const addExclusionButton = screen.getByRole('button', { name: /add new exclusion rule/i })
+      await user.click(addExclusionButton)
+
+      let fromSelects = screen.getAllByRole('combobox', { name: /from/i })
+      let toSelects = screen.getAllByRole('combobox', { name: /to/i })
+
+      // Set up first exclusion: alice -/-> bob
+      await user.click(fromSelects[0])
+      await selectOption('alice@test.com')
+
+      await user.click(toSelects[0])
+      await selectOption('bob@test.com')
+
+      // Clear any existing toasts
+      mockToast.mockClear()
+
+      // Add second exclusion row
+      await user.click(addExclusionButton)
+
+      // Should now have 2 rows
+      fromSelects = screen.getAllByRole('combobox', { name: /from/i })
+      toSelects = screen.getAllByRole('combobox', { name: /to/i })
+      expect(fromSelects).toHaveLength(2)
+      expect(toSelects).toHaveLength(2)
+
+      // Set up second exclusion with same values: alice -/-> bob
+      await user.click(fromSelects[1])
+      await selectOption('alice@test.com')
+
+      await user.click(toSelects[1])
+      await selectOption('bob@test.com')
+
+      // Should trigger actual duplicate validation (not false positive)
+      await waitFor(() => {
+        expect(mockToast).toHaveBeenCalledWith({
+          title: "Validation Error",
+          description: "This exclusion already exists",
+          variant: "destructive"
+        })
+      })
+    })
+
+    it('still validates real conflicts between exclusions and forced pairings', async () => {
+      await setupForm()
+
+      // Add exclusion first: alice -/-> bob
+      const addExclusionButton = screen.getByRole('button', { name: /add new exclusion rule/i })
+      await user.click(addExclusionButton)
+
+      let fromSelect = screen.getByRole('combobox', { name: /from/i })
+      let toSelect = screen.getByRole('combobox', { name: /to/i })
+
+      await user.click(fromSelect)
+      await selectOption('alice@test.com')
+
+      await user.click(toSelect)
+      await selectOption('bob@test.com')
+
+      // Clear toasts
+      mockToast.mockClear()
+
+      // Now try to add conflicting forced pairing: alice -> bob
+      const forcedPairsTab = screen.getByRole('tab', { name: /forced pairs/i })
+      await user.click(forcedPairsTab)
+
+      const addForcedButton = screen.getByRole('button', { name: /add new forced pairing rule/i })
+      await user.click(addForcedButton)
+
+      fromSelect = screen.getByRole('combobox', { name: /from/i })
+      toSelect = screen.getByRole('combobox', { name: /to/i })
+
+      await user.click(fromSelect)
+      await selectOption('alice@test.com')
+
+      await user.click(toSelect)
+      await selectOption('bob@test.com')
+
+      // Should detect conflict
+      await waitFor(() => {
+        expect(mockToast).toHaveBeenCalledWith({
+          title: "Validation Error",
+          description: "This conflicts with an existing exclusion",
+          variant: "destructive"
         })
       })
     })

@@ -132,15 +132,15 @@ describe('SecretSantaForm', () => {
     renderForm()
 
     const advancedOptionsButton = screen.getByText('Advanced Options')
-    
-    // Should not show placeholder text initially
-    expect(screen.queryByText(/Advanced options \(exclusions, forced pairings, name mappings\) coming in Step 4!/)).not.toBeInTheDocument()
-    
+
+    // Helper copy should be visible while collapsed
+    expect(screen.getByText(/Click to customize exclusions, pairings & names/i)).toBeInTheDocument()
+
     // Click to expand
     await user.click(advancedOptionsButton)
-    
+
     await waitFor(() => {
-      expect(screen.getByText(/Advanced options \(exclusions, forced pairings, name mappings\) coming in Step 4!/)).toBeInTheDocument()
+      expect(screen.getByText(/Enter participant emails first to configure advanced options/i)).toBeInTheDocument()
     })
   })
 
