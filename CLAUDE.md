@@ -4,10 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Spring Boot application that generates Secret Santa pairs for a group of people. The application creates a graph-based solution where participants are matched while respecting exclusions (people who shouldn't be paired together) and optional "cheat" mappings for predetermined pairs.
+This is a **full-stack Secret Santa application** consisting of a modern React frontend and a Spring Boot backend. The application provides an intuitive web interface for generating Secret Santa pairs while respecting complex constraints and preferences.
+
+**Frontend**: A Next.js/React application with Christmas-themed design, real-time validation, advanced options, and comprehensive user experience.
+
+**Backend**: A Spring Boot application with sophisticated graph-based algorithms that generates Secret Santa pairs while respecting exclusions (people who shouldn't be paired together) and optional "cheat" mappings for predetermined pairs.
+
+**Integration**: The frontend consumes RESTful APIs from the backend, providing a seamless full-stack experience for Secret Santa generation with email delivery capabilities.
 
 ## Key Technologies
 
+### Backend Stack
 - **Spring Boot 3.4.5** with WebFlux (reactive programming)
 - **Java 21 LTS** (Long-Term Support until 2031)
 - **Maven** for dependency management and build
@@ -16,9 +23,20 @@ This is a Spring Boot application that generates Secret Santa pairs for a group 
 - **Mockito 5.15.2** for testing
 - **Docker** deployment via Jib plugin 3.4.6
 
+### Frontend Stack
+- **Next.js 15.5.2** with Turbopack for fast development and hot reloading
+- **React 18** with TypeScript for type-safe UI development
+- **shadcn/ui** component library built on Radix UI primitives
+- **Tailwind CSS** with custom Christmas design system and semantic colors
+- **React Hook Form + Zod** for form validation and schema validation
+- **Vitest** testing framework with 170+ comprehensive test cases
+- **Lucide React** for consistent iconography
+- **Sonner** for toast notifications
+- **Vercel** deployment platform with automatic deployments
+
 ## Essential Commands
 
-### Build and Test
+### Backend Commands
 ```bash
 # Clean build with tests
 ./mvnw clean install
@@ -34,21 +52,58 @@ This is a Spring Boot application that generates Secret Santa pairs for a group 
 
 # Generate code coverage report
 ./mvnw jacoco:report
-```
 
-### Running the Application
-```bash
-# Run locally
+# Run backend locally
 ./mvnw spring-boot:run
 
 # Build and run Docker image
 ./mvnw jib:dockerBuild
-```
 
-### Docker Deployment
-```bash
 # Build and push to Docker Hub (requires deploy-docker profile)
 ./mvnw deploy jib:build -P deploy-docker
+```
+
+### Frontend Commands
+```bash
+# Navigate to frontend directory
+cd frontend
+
+# Install dependencies
+npm install
+
+# Start development server with hot reload
+npm run dev
+
+# Run frontend tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+
+# Run linting
+npm run lint
+
+# Run type checking
+npm run typecheck
+```
+
+### Full-Stack Development Workflow
+```bash
+# Terminal 1: Start backend (from project root)
+cd backend && ./mvnw spring-boot:run
+
+# Terminal 2: Start frontend (from project root)
+cd frontend && npm run dev
+
+# Access application:
+# Frontend: http://localhost:3000
+# Backend API: http://localhost:8080
 ```
 
 ## Modernization Updates (2024)
@@ -85,7 +140,9 @@ This project has been updated from legacy versions to modern, secure versions:
 
 ## Architecture
 
-### Clean Architecture Layers
+This section covers both frontend and backend architecture patterns and design principles.
+
+### Backend Architecture (Clean Architecture Layers)
 
 #### 1. Controller Layer (HTTP Boundary)
 **SecretSantaController** (`src/main/java/.../controller/`)
@@ -151,6 +208,59 @@ This project has been updated from legacy versions to modern, secure versions:
 - **EmailStatus**: Overall delivery status (SUCCESS, FAILED, PARTIAL, PENDING, DISABLED)
 - **EmailResult**: Individual email delivery result (DELIVERED, FAILED, PENDING, SKIPPED)
 
+### Frontend Architecture (Modern React Patterns)
+
+#### 1. Component Architecture
+**Page Level** (`app/page.tsx`)
+- **Main Application**: Single-page app with responsive layout
+- **Christmas Theme**: Comprehensive design system with semantic colors
+- **Layout Structure**: Hero section + main form with 60/40 split layout
+
+**Component Layer** (`components/secret-santa/`)
+- **ParticipantForm**: Main form orchestrator with React Hook Form
+- **EnhancedEmailInput**: Real-time email validation with visual feedback
+- **AdvancedOptions**: Tabbed interface for exclusions, forced pairings, name mappings
+- **ResultsDisplay**: Success animations, confetti effects, export functionality
+
+**UI Components** (`components/ui/`)
+- **shadcn/ui**: Pre-built accessible components (Button, Card, Tabs, etc.)
+- **Design System**: Christmas color palette with semantic meaning
+- **Responsive**: Mobile-first design with progressive enhancement
+
+#### 2. State Management & Validation
+**Form State** (React Hook Form + Zod)
+- **Type-Safe Forms**: Zod schema validation with TypeScript integration
+- **Real-Time Validation**: Field-level and cross-field validation
+- **Error Handling**: Comprehensive error states and user feedback
+
+**Advanced Validation Features:**
+- **Field-Aware Validation**: Prevents false duplicate warnings during editing
+- **Cross-Validation**: Detects conflicts between exclusions and forced pairings
+- **Email Validation**: Real-time email format and duplicate detection
+
+#### 3. API Integration Layer
+**Client-Side API** (`lib/api.ts`)
+- **RESTful Integration**: Consumes Spring Boot backend APIs
+- **Error Handling**: Comprehensive error states and user feedback
+- **Type Safety**: TypeScript interfaces for all API responses
+
+**Request/Response Flow:**
+```
+User Input → Form Validation → API Call → Response Processing → UI Update
+```
+
+#### 4. Design System
+**Christmas Theme** (`app/globals.css`)
+- **Semantic Colors**: Green for success, Red for errors, maintaining Christmas aesthetic
+- **Brand Colors**: Christmas Red for CTAs, Forest Green for success states
+- **Typography**: Consistent font scales and spacing
+- **Animations**: Smooth transitions and success animations
+
+**Component Patterns:**
+- **Composition**: Reusable components with clear interfaces
+- **Accessibility**: WCAG 2.1 AA compliance with screen reader support
+- **Progressive Enhancement**: Works without JavaScript, enhanced with React
+
 ### Reactive Flow
 
 The application uses Project Reactor patterns with clean layer separation:
@@ -215,7 +325,9 @@ secret-santa.email.batch.enabled=true         # Enable batch email sending
 
 ## Testing
 
-### Test Structure
+This section covers testing strategies for both frontend and backend components.
+
+### Backend Test Structure
 
 **Algorithm Tests:**
 - **HamiltonianTourServiceTest**: Tests the core algorithm with various graph scenarios
@@ -263,6 +375,57 @@ secret-santa.email.batch.enabled=true         # Enable batch email sending
 # Run controller tests (now thin integration tests)
 ./mvnw test -Dtest=SecretSantaControllerTransactionalTest
 ```
+
+### Frontend Test Structure
+
+**Component Tests** (`__tests__/components/`)
+- **Enhanced Email Input**: Real-time validation, duplicate detection, error handling
+- **Advanced Options**: Form validation, field-aware duplicate prevention, tab interactions
+- **Participant Form**: Main form flow, live preview, responsiveness
+- **Results Display**: Success animations, export functionality, error states
+- **UI Components**: Button, Card, Tabs, and other shadcn/ui component tests
+
+**Integration Tests** (`__tests__/components/secret-santa/`)
+- **Advanced Options Integration**: Full form submission with complex validation scenarios
+- **Field-Aware Validation**: Tests for bug fixes preventing false duplicate warnings
+- **Cross-Component Integration**: Email input + advanced options + form submission flow
+
+**Utility Tests** (`__tests__/lib/`)
+- **API Integration**: Request/response handling, error scenarios
+- **Form Validation**: Email parsing, validation utils, type transformations
+
+### Frontend Test Coverage
+- **170+ Tests**: Comprehensive test suite with excellent coverage
+- **Testing Framework**: Vitest with React Testing Library for modern component testing
+- **Mock Strategies**: API mocking, user event simulation, form state testing
+- **Validation Testing**: Field-level, cross-field, and integration validation scenarios
+
+### Key Frontend Test Commands
+```bash
+# Navigate to frontend directory
+cd frontend
+
+# Run all tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run specific test files
+npm test advanced-options
+npm test enhanced-email-input
+npm test participant-form
+
+# Run tests in watch mode
+npm test --watch
+```
+
+**Critical Test Scenarios:**
+- **Field-Aware Validation**: Prevents false duplicate warnings during editing
+- **Real-Time Email Validation**: Format validation, duplicate detection, error display
+- **Cross-Component Integration**: Form submission with advanced options
+- **Responsive Design**: Mobile and desktop layout testing
+- **Accessibility**: Screen reader compatibility, keyboard navigation
 
 ## CI/CD
 
@@ -339,8 +502,114 @@ Email:         TransactionalMailingService (retry logic, status tracking)
 - **Email behavior changes**: Update TransactionalMailingService
 - **API changes**: Only modify SecretSantaController for HTTP concerns
 
-### Testing Strategy
+### Full-Stack Testing Strategy
+
+#### Backend Testing Strategy
 - **Business Logic**: Test orchestration service with mocked dependencies
 - **Strategies**: Test each email delivery strategy independently
 - **Controller**: Integration tests via orchestration service mock
 - **Algorithm**: Comprehensive edge case testing in HamiltonianTourServiceTest
+
+#### Frontend Testing Strategy
+- **Component Testing**: Isolated component testing with React Testing Library
+- **Integration Testing**: Cross-component interaction and form submission flows
+- **Validation Testing**: Field-aware validation logic and error scenarios
+- **User Experience Testing**: Accessibility, responsive design, and user interactions
+- **API Integration Testing**: Frontend-backend communication with mocked responses
+
+#### End-to-End Integration
+- **Full-Stack Flow**: User input → Frontend validation → API call → Backend processing → UI update
+- **Error Scenarios**: Network failures, validation errors, and recovery flows
+- **Performance Testing**: Form responsiveness, API response times, animation performance
+
+## Full-Stack Development Workflow
+
+### Frontend-Backend Integration
+
+**API Endpoints:**
+```
+POST /generatePairs - Main Secret Santa generation endpoint
+CORS enabled for frontend development (http://localhost:3000)
+```
+
+**Request/Response Flow:**
+```
+1. User fills form in React frontend
+2. Frontend validates input (emails, exclusions, etc.)
+3. API call to Spring Boot backend
+4. Backend processes with Hamiltonian algorithm
+5. Response with pairs + email status
+6. Frontend displays results with animations
+```
+
+**Development Environment Setup:**
+```bash
+# Terminal 1: Backend (Java Spring Boot)
+cd backend
+./mvnw spring-boot:run
+# Runs on http://localhost:8080
+
+# Terminal 2: Frontend (Next.js)
+cd frontend
+npm run dev
+# Runs on http://localhost:3000
+```
+
+### Integration Points
+
+**CORS Configuration** (`backend/src/main/java/.../config/CorsConfig.java`)
+- Allows frontend development server access
+- Configured for http://localhost:3000
+- Enables credentials and common headers
+
+**API Client** (`frontend/lib/api.ts`)
+- TypeScript interfaces for all backend responses
+- Error handling for network failures
+- Request/response transformation
+
+**Data Flow:**
+```
+Frontend Form → Validation → API Request → Backend Processing → Email Delivery → UI Update
+```
+
+### Development Best Practices
+
+#### Frontend Development
+1. **Component-First**: Build UI components independently
+2. **Type Safety**: Use TypeScript interfaces for all API communication
+3. **Validation**: Client-side validation with server-side backup
+4. **Testing**: Test components, integration, and user flows
+5. **Accessibility**: WCAG 2.1 AA compliance throughout
+
+#### Backend Development
+1. **Clean Architecture**: Maintain separation of concerns
+2. **Testing**: Comprehensive unit and integration tests
+3. **Error Handling**: Graceful degradation for all scenarios
+4. **Performance**: Optimize algorithms for typical group sizes
+5. **Security**: Input validation and secure email handling
+
+#### Integration Development
+1. **API-First**: Design backend APIs with frontend needs in mind
+2. **Error Handling**: Consistent error responses across the stack
+3. **Type Safety**: Shared interfaces between frontend and backend
+4. **Testing**: End-to-end testing of complete user journeys
+5. **Documentation**: Keep API documentation current
+
+### Deployment Architecture
+
+**Frontend (Vercel)**
+- Next.js automatic deployments
+- Environment variables for API endpoints
+- Performance optimization with Turbopack
+
+**Backend (Docker)**
+- Containerized Spring Boot application
+- Environment variables for email configuration
+- Health checks and monitoring
+
+**Integration**
+- Frontend configured to call production backend API
+- CORS properly configured for production domains
+- SSL/TLS for secure communication
+
+This full-stack architecture provides a robust, scalable Secret Santa application with modern development practices and comprehensive testing coverage.
