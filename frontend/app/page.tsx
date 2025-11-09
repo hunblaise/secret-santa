@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Gift } from 'lucide-react'
+import Image from 'next/image'
 import { SecretSantaForm } from '@/components/secret-santa/participant-form'
 import { ResultsDisplay } from '@/components/secret-santa/results-display'
 import { SecretSantaResponse } from '@/lib/types'
@@ -56,14 +56,22 @@ export default function Home() {
               {/* Hero Content Box (Box 2 - Elevated content area) */}
               <div className="flex-1 flex items-center justify-center px-4 py-12 lg:py-16">
                 <div className="text-center max-w-5xl mx-auto w-full">
-                  {/* Icon Container (Box 3 - Most elevated element) */}
+                  {/* Yeti Mascot (Box 3 - Most elevated element) */}
                   <div className="flex justify-center mb-6 lg:mb-8">
                     <div className="relative">
                       {/* Outer glow effect */}
-                      <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full" />
-                      {/* Elevated icon container with gradient and shadow */}
-                      <div className="relative bg-gradient-to-br from-red-100 to-red-300/30 p-6 lg:p-8 rounded-full shadow-prominent animate-bounce-gift backdrop-blur-sm">
-                        <Gift className="h-12 w-12 lg:h-16 lg:w-16 text-primary drop-shadow-lg" />
+                      <div className="absolute inset-0 bg-gradient-to-br from-red-500/30 to-green-500/30 blur-3xl rounded-full scale-125" />
+                      {/* Elevated mascot container with gradient and shadow */}
+                      <div className="relative bg-gradient-to-br from-cream-200/60 to-white/80 p-4 lg:p-6 rounded-3xl shadow-prominent animate-bounce-gift backdrop-blur-sm">
+                        <div className="relative w-24 h-24 lg:w-32 lg:h-32">
+                          <Image
+                            src="/yeti-santa.png"
+                            alt="Friendly Yeti with Santa hat"
+                            fill
+                            className="object-contain drop-shadow-2xl"
+                            priority
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -148,9 +148,13 @@ describe('Christmas Theme and Animations', () => {
     it('should use Christmas red for primary elements', () => {
       const { container } = render(<Home />)
 
-      // Gift icon should use primary color (Christmas red)
-      const giftIcon = container.querySelector('.text-primary')
-      expect(giftIcon).toBeInTheDocument()
+      // Yeti mascot should be present with proper styling
+      const yetiImage = container.querySelector('img[alt="Friendly Yeti with Santa hat"]')
+      expect(yetiImage).toBeInTheDocument()
+
+      // Trust indicators should use Christmas colors
+      const trustIndicators = container.querySelectorAll('[class*="bg-gradient"]')
+      expect(trustIndicators.length).toBeGreaterThan(0)
     })
 
     it('should use color scheme for trust indicators', () => {
