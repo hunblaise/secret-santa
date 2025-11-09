@@ -47,46 +47,47 @@
   --radius: 0.625rem;
 
   /* ============================================
-     LAYERED COLOR SYSTEM - 4 Shades Per Color
+     VIBRANT NATURE COLOR SYSTEM - 4-5 Shades Per Color
      Following UI/UX guideline: Darker = deeper, Lighter = elevated
+     Palette: Red (#DA2C38), Dark Green (#226F54), Light Green (#87C38F), Cream (#F4F0BB), Brown (#43291F)
      ============================================ */
 
-  /* Festive Red Shades (Primary) - Deep burgundy → Bright red → Rose */
-  --red-900: oklch(0.371 0.214 27.325); /* Deep Burgundy - deepest backgrounds */
-  --red-700: oklch(0.471 0.214 27.325); /* Rich Red - standard backgrounds */
-  --red-500: oklch(0.571 0.214 27.325); /* Christmas Red - elevated surfaces */
-  --red-300: oklch(0.671 0.214 27.325); /* Light Red - most elevated */
-  --red-100: oklch(0.771 0.214 27.325); /* Rose - subtle highlights */
+  /* Vibrant Red Shades (Primary) - Deep burgundy → Vibrant red → Rose */
+  --red-900: oklch(0.37 0.19 23); /* Deep Burgundy - deepest backgrounds */
+  --red-700: oklch(0.47 0.19 23); /* Rich Red - standard backgrounds */
+  --red-500: oklch(0.53 0.19 23); /* Vibrant Red #DA2C38 - elevated surfaces */
+  --red-300: oklch(0.68 0.15 23); /* Light Red - most elevated */
+  --red-100: oklch(0.82 0.10 23); /* Rose - subtle highlights */
 
-  /* Forest Green Shades (Secondary) - Deep forest → Emerald → Mint */
-  --green-900: oklch(0.4 0.169 152.887); /* Deep Forest - deepest backgrounds */
-  --green-700: oklch(0.5 0.169 152.887); /* Rich Green - standard backgrounds */
-  --green-500: oklch(0.6 0.169 152.887); /* Forest Green - elevated surfaces */
-  --green-300: oklch(0.7 0.169 152.887); /* Emerald - most elevated */
-  --green-100: oklch(0.8 0.169 152.887); /* Mint - subtle highlights */
+  /* Nature Green Shades (Secondary) - Deep forest → Rich green → Sage */
+  --green-900: oklch(0.35 0.10 160); /* Deep Forest - deepest backgrounds */
+  --green-700: oklch(0.44 0.10 160); /* Dark Green #226F54 - standard backgrounds */
+  --green-500: oklch(0.63 0.10 150); /* Light Green #87C38F - elevated surfaces */
+  --green-300: oklch(0.75 0.08 150); /* Sage - most elevated */
+  --green-100: oklch(0.85 0.05 150); /* Mint - subtle highlights */
 
-  /* Gold Shades (Accent) - Deep gold → Bright gold → Pale gold */
-  --gold-900: oklch(0.646 0.108 85.87); /* Deep Gold - deepest backgrounds */
-  --gold-700: oklch(0.746 0.108 85.87); /* Rich Gold - standard backgrounds */
-  --gold-500: oklch(0.846 0.108 85.87); /* Gold Star - elevated surfaces */
-  --gold-300: oklch(0.906 0.108 85.87); /* Pale Gold - most elevated */
-  --gold-100: oklch(0.946 0.108 85.87); /* Champagne - subtle highlights */
+  /* Cream Shades (Warm Accent) - Warm neutrals for cozy feel */
+  --cream-900: oklch(0.78 0.08 95); /* Deep Cream - deepest backgrounds */
+  --cream-700: oklch(0.85 0.08 95); /* Rich Cream - standard backgrounds */
+  --cream-500: oklch(0.93 0.08 95); /* Cream #F4F0BB - elevated surfaces */
+  --cream-300: oklch(0.96 0.05 95); /* Pale Cream - most elevated */
+  --cream-100: oklch(0.98 0.03 95); /* Champagne - subtle highlights */
 
-  /* Neutral Shades - Charcoal → Medium gray → Light gray → Snow */
-  --neutral-900: oklch(0.145 0 0); /* Charcoal - text, deepest backgrounds */
-  --neutral-700: oklch(0.556 0 0); /* Medium Gray - secondary text */
-  --neutral-500: oklch(0.722 0 0); /* Gray - borders, dividers */
-  --neutral-300: oklch(0.868 0 0); /* Light Gray - subtle backgrounds */
-  --neutral-200: oklch(0.922 0 0); /* Very Light - inputs, borders */
-  --neutral-100: oklch(0.968 0.002 247.858); /* Warm Snow - muted backgrounds */
-  --neutral-50: oklch(0.985 0 0); /* Off White - cards */
-  --neutral-0: oklch(1 0 0); /* Pure Snow - main background */
+  /* Brown/Neutral Shades - Chocolate brown → Warm grays → Cream */
+  --neutral-900: oklch(0.24 0.03 35); /* Chocolate Brown #43291F - text, deepest backgrounds */
+  --neutral-700: oklch(0.48 0.02 35); /* Warm Gray - secondary text */
+  --neutral-500: oklch(0.62 0.02 35); /* Medium Gray - borders, dividers */
+  --neutral-300: oklch(0.78 0.02 35); /* Light Warm Gray - subtle backgrounds */
+  --neutral-200: oklch(0.88 0.02 35); /* Very Light Cream - inputs, borders */
+  --neutral-100: oklch(0.94 0.03 95); /* Warm Cream - muted backgrounds */
+  --neutral-50: oklch(0.97 0.02 95); /* Off Cream - cards */
+  --neutral-0: oklch(0.99 0.01 95); /* Warm White - main background */
 
-  /* Ice Blue Shades (Info) - Deep ice → Light ice → Frost */
-  --blue-900: oklch(0.453 0.013 220.15); /* Deep Ice */
-  --blue-700: oklch(0.653 0.013 220.15); /* Medium Ice */
-  --blue-500: oklch(0.853 0.013 220.15); /* Light Ice */
-  --blue-300: oklch(0.953 0.013 220.15); /* Frost */
+  /* Sage/Info Shades (Info states) - Soft greens for information */
+  --sage-900: oklch(0.45 0.08 155); /* Deep Sage */
+  --sage-700: oklch(0.60 0.08 155); /* Medium Sage */
+  --sage-500: oklch(0.72 0.07 155); /* Light Sage */
+  --sage-300: oklch(0.85 0.05 155); /* Pale Sage */
 
   /* ============================================
      SEMANTIC COLOR MAPPINGS
@@ -117,9 +118,9 @@
   --muted: var(--neutral-100); /* Warm Snow for muted backgrounds */
   --muted-foreground: var(--neutral-700);
 
-  /* Accent - Gold with hierarchy */
-  --accent: var(--gold-500); /* Gold Star for highlights */
-  --accent-hover: var(--gold-700); /* Darker on hover */
+  /* Accent - Cream with hierarchy */
+  --accent: var(--cream-500); /* Cream for highlights */
+  --accent-hover: var(--cream-700); /* Darker on hover */
   --accent-foreground: var(--neutral-900);
 
   /* Destructive - Red with hierarchy */
@@ -127,21 +128,21 @@
   --destructive-hover: var(--red-700);
   --destructive-foreground: var(--neutral-0);
 
-  /* Borders & Inputs - Subtle neutrals */
+  /* Borders & Inputs - Subtle warm neutrals */
   --border: var(--neutral-200);
   --input: var(--neutral-200);
-  --ring: var(--red-500); /* Christmas Red focus ring */
+  --ring: var(--red-500); /* Vibrant Red focus ring */
 
-  /* Info states - Ice Blue */
-  --info: var(--blue-300); /* Frost for info backgrounds */
+  /* Info states - Soft Sage */
+  --info: var(--sage-300); /* Pale Sage for info backgrounds */
   --info-foreground: var(--neutral-900);
 
-  /* Chart colors - Using mid-tier shades */
+  /* Chart colors - Using Vibrant Nature palette */
   --chart-1: var(--red-500);
-  --chart-2: var(--green-500);
-  --chart-3: var(--gold-500);
+  --chart-2: var(--green-700);
+  --chart-3: var(--cream-500);
   --chart-4: var(--red-700);
-  --chart-5: var(--blue-700);
+  --chart-5: var(--sage-700);
 
   /* Sidebar - Elevated with neutral shades */
   --sidebar: var(--neutral-50);

@@ -103,8 +103,8 @@ export function SecretSantaForm({ onResults, isLoading, setIsLoading }: SecretSa
             <Card className="bg-card shadow-standard hover:shadow-prominent transition-all duration-300 border-0">
               <CardHeader className="space-y-3 pb-4">
                 <CardTitle className="flex items-center gap-3 text-xl">
-                  <div className="p-2.5 bg-gradient-to-br from-blue-300/30 to-blue-500/20 rounded-xl shadow-subtle">
-                    <Users className="h-5 w-5 text-blue-700" />
+                  <div className="p-2.5 bg-gradient-to-br from-green-300/40 to-green-500/30 rounded-xl shadow-subtle">
+                    <Users className="h-5 w-5 text-green-700" />
                   </div>
                   <span className="bg-gradient-to-br from-neutral-900 to-neutral-700 bg-clip-text text-transparent">
                     Participants
@@ -163,20 +163,20 @@ export function SecretSantaForm({ onResults, isLoading, setIsLoading }: SecretSa
             <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
               <Card className={`border-2 transition-all duration-300 ${
                 showAdvanced
-                  ? 'border-gold-500 bg-card shadow-standard'
-                  : 'border-dashed border-neutral-300 bg-card/60 shadow-subtle hover:border-solid hover:border-gold-500/50 hover:shadow-standard'
+                  ? 'border-cream-700 bg-card shadow-standard'
+                  : 'border-dashed border-neutral-300 bg-card/60 shadow-subtle hover:border-solid hover:border-cream-500/50 hover:shadow-standard'
               }`}>
                 <CollapsibleTrigger asChild>
-                  <CardHeader className="cursor-pointer transition-all duration-300 hover:bg-gradient-to-r hover:from-gold-500/5 hover:to-transparent">
+                  <CardHeader className="cursor-pointer transition-all duration-300 hover:bg-gradient-to-r hover:from-cream-500/5 hover:to-transparent">
                     <CardTitle className="flex items-center justify-between text-lg lg:text-xl">
                       <div className="flex items-center gap-3">
                         <div className={`p-2.5 rounded-xl transition-all duration-300 shadow-subtle ${
                           showAdvanced
-                            ? 'bg-gradient-to-br from-gold-300 to-gold-500 shadow-button'
-                            : 'bg-gradient-to-br from-gold-300/30 to-gold-500/20'
+                            ? 'bg-gradient-to-br from-cream-500 to-cream-700 shadow-button'
+                            : 'bg-gradient-to-br from-cream-300/40 to-cream-500/30'
                         }`}>
                           <Settings className={`h-5 w-5 transition-colors ${
-                            showAdvanced ? 'text-white' : 'text-gold-700'
+                            showAdvanced ? 'text-neutral-900' : 'text-cream-900'
                           }`} />
                         </div>
                         <div>
@@ -268,13 +268,13 @@ export function SecretSantaForm({ onResults, isLoading, setIsLoading }: SecretSa
       <div className="lg:col-span-2">
         <div className="sticky top-8">
           <Card className="bg-card shadow-prominent hover:shadow-elevated transition-all duration-500 border-0 overflow-hidden">
-            {/* Gradient accent at top */}
-            <div className="h-1.5 bg-gradient-to-r from-red-500 via-gold-500 to-green-500"></div>
+            {/* Gradient accent at top - Vibrant Nature colors */}
+            <div className="h-1.5 bg-gradient-to-r from-red-500 via-cream-500 to-green-500"></div>
 
             <CardHeader className="space-y-3 pb-4">
               <CardTitle className="flex items-center gap-3 text-xl">
-                <div className="p-2.5 bg-gradient-to-br from-red-300/30 to-red-500/20 rounded-xl shadow-subtle">
-                  <Gift className="h-5 w-5 text-red-700" />
+                <div className="p-2.5 bg-gradient-to-br from-green-300/40 to-green-500/30 rounded-xl shadow-subtle">
+                  <Gift className="h-5 w-5 text-green-700" />
                 </div>
                 <span className="bg-gradient-to-br from-neutral-900 to-neutral-700 bg-clip-text text-transparent">
                   Live Preview
@@ -315,18 +315,18 @@ export function SecretSantaForm({ onResults, isLoading, setIsLoading }: SecretSa
                   <div className={`p-4 rounded-xl border-2 transition-all duration-300 shadow-standard ${
                     emailCount >= 3
                       ? 'border-green-500 bg-gradient-to-br from-green-100/60 to-green-300/30'
-                      : 'border-gold-500 bg-gradient-to-br from-gold-100/60 to-gold-300/30'
+                      : 'border-cream-700 bg-gradient-to-br from-cream-100/60 to-cream-300/30'
                   }`}>
                     <div className="flex items-center gap-3 text-sm font-semibold">
                       {emailCount >= 3 ? (
                         <>
                           <div className="w-3 h-3 bg-gradient-to-br from-green-500 to-green-700 rounded-full shadow-subtle animate-pulse"></div>
-                          <span className="text-green-800">Ready to generate!</span>
+                          <span className="text-green-900">Ready to generate!</span>
                         </>
                       ) : (
                         <>
-                          <div className="w-3 h-3 bg-gradient-to-br from-gold-500 to-gold-700 rounded-full shadow-subtle animate-pulse"></div>
-                          <span className="text-gold-800">Need {3 - emailCount} more participant{3 - emailCount !== 1 ? 's' : ''}</span>
+                          <div className="w-3 h-3 bg-gradient-to-br from-cream-700 to-cream-900 rounded-full shadow-subtle animate-pulse"></div>
+                          <span className="text-cream-900">Need {3 - emailCount} more participant{3 - emailCount !== 1 ? 's' : ''}</span>
                         </>
                       )}
                     </div>

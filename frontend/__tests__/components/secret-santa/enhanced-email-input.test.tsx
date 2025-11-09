@@ -53,8 +53,9 @@ describe('EnhancedEmailInput', () => {
     expect(screen.getByPlaceholderText('Enter emails...')).toBeInTheDocument()
     // Text is now split across multiple elements in new design
     expect(screen.getByText(/Enter one email address per line/)).toBeInTheDocument()
-    expect(screen.getByText(/0.*valid participants/)).toBeInTheDocument()
-    expect(screen.getByText(/0.*participant/)).toBeInTheDocument()
+    // Text "0 valid participants" is split: "Enter one email address per line • <span>0</span> valid participants"
+    expect(screen.getByText(/valid participants/)).toBeInTheDocument()
+    expect(screen.getByText(/0 participants?/)).toBeInTheDocument()
   })
 
   it('should validate single valid email', async () => {
@@ -216,8 +217,9 @@ describe('EnhancedEmailInput', () => {
   it('should handle empty input gracefully', () => {
     renderEnhancedInput('')
 
-    expect(screen.getByText('0 participants')).toBeInTheDocument()
-    expect(screen.getByText(/0 valid participants/)).toBeInTheDocument()
+    expect(screen.getByText(/0 participants?/)).toBeInTheDocument()
+    // Text is split across elements: "Enter one email address per line • <span>0</span> valid participants"
+    expect(screen.getByText(/valid participants/)).toBeInTheDocument()
     expect(screen.queryByText(/invalid/)).not.toBeInTheDocument()
     expect(screen.queryByText(/duplicate/)).not.toBeInTheDocument()
   })

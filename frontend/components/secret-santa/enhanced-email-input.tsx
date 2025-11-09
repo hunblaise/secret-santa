@@ -145,7 +145,7 @@ export function EnhancedEmailInput({ value, onChange, placeholder, className }: 
             </Badge>
           )}
           {emailValidation.duplicateCount > 0 && (
-            <Badge variant="outline" className="text-xs shadow-subtle bg-gradient-to-br from-gold-100 to-gold-300/40 border-gold-500 text-gold-800">
+            <Badge variant="outline" className="text-xs shadow-subtle bg-gradient-to-br from-cream-100 to-cream-300/40 border-cream-700 text-cream-900">
               <AlertTriangle className="h-3 w-3 mr-1" />
               {emailValidation.duplicateCount} duplicate
             </Badge>

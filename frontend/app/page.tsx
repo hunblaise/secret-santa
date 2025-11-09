@@ -43,9 +43,9 @@ export default function Home() {
         ))}
       </div>
 
-      {/* Background Gradient Layer - Layer 1 */}
+      {/* Background Gradient Layer - Layer 1 - Warm natural gradient */}
       <div className="fixed inset-0 z-[1] pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-300/20 via-transparent to-blue-300/10" />
+        <div className="absolute inset-0 bg-gradient-to-br from-cream-300/30 via-transparent to-green-300/15" />
       </div>
 
       <main className="relative z-10">
