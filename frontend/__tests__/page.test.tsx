@@ -58,8 +58,8 @@ describe('Home Page', () => {
 
   it('has proper responsive background styling', () => {
     const { container } = render(<Home />)
-    
-    const backgroundContainer = container.querySelector('.min-h-screen.bg-hero-gradient')
+
+    const backgroundContainer = container.querySelector('.min-h-screen.bg-background')
     expect(backgroundContainer).toBeInTheDocument()
   })
 

@@ -129,23 +129,23 @@ export function EnhancedEmailInput({ value, onChange, placeholder, className }: 
 
   return (
     <FormItem>
-      <FormLabel className="flex items-center justify-between">
-        <span>Email Addresses</span>
-        <div className="flex items-center gap-2">
+      <FormLabel className="flex items-center justify-between mb-3">
+        <span className="text-base font-semibold text-neutral-900">Email Addresses</span>
+        <div className="flex items-center gap-1.5 flex-wrap justify-end">
           {emailValidation.validCount > 0 && (
-            <Badge variant="secondary" className="text-xs">
+            <Badge variant="secondary" className="text-xs shadow-subtle bg-gradient-to-br from-green-100 to-green-300/40 text-green-800 border-0">
               <Check className="h-3 w-3 mr-1" />
               {emailValidation.validCount} valid
             </Badge>
           )}
           {emailValidation.invalidCount > 0 && (
-            <Badge variant="destructive" className="text-xs">
+            <Badge variant="destructive" className="text-xs shadow-subtle bg-gradient-to-br from-red-100 to-red-300/40 text-red-800 border-0">
               <X className="h-3 w-3 mr-1" />
               {emailValidation.invalidCount} invalid
             </Badge>
           )}
           {emailValidation.duplicateCount > 0 && (
-            <Badge variant="outline" className="text-xs border-amber-500 text-amber-600">
+            <Badge variant="outline" className="text-xs shadow-subtle bg-gradient-to-br from-gold-100 to-gold-300/40 border-gold-500 text-gold-800">
               <AlertTriangle className="h-3 w-3 mr-1" />
               {emailValidation.duplicateCount} duplicate
             </Badge>
@@ -153,10 +153,10 @@ export function EnhancedEmailInput({ value, onChange, placeholder, className }: 
         </div>
       </FormLabel>
       <FormControl>
-        <div className="relative">
+        <div className="relative rounded-xl overflow-hidden shadow-inset-polished bg-gradient-to-br from-neutral-100 to-neutral-50">
           <Textarea
             placeholder={placeholder}
-            className={`min-h-[120px] font-mono text-sm relative z-20 resize-none ${className}`}
+            className={`min-h-[140px] font-mono text-sm relative z-20 resize-none bg-transparent border-0 focus:ring-2 focus:ring-red-500/30 focus:shadow-inset transition-all duration-300 ${className}`}
             value={value}
             onChange={(e) => onChange(e.target.value)}
             style={{ lineHeight: '1.25rem' }} // 20px line height for h-5
@@ -164,18 +164,27 @@ export function EnhancedEmailInput({ value, onChange, placeholder, className }: 
           {renderEmailIcons()}
         </div>
       </FormControl>
-      <div className="flex items-center justify-between">
-        <FormDescription>
-          Enter one email address per line • {emailValidation.validCount} valid participants
+      <div className="flex items-center justify-between gap-3 mt-3">
+        <FormDescription className="text-sm text-neutral-700">
+          Enter one email address per line • <span className="font-semibold text-neutral-900">{emailValidation.validCount}</span> valid participants
         </FormDescription>
-        <Badge variant={emailValidation.validCount >= 3 ? "success" : "destructive"}>
+        <Badge
+          className={`shadow-subtle font-semibold ${
+            emailValidation.validCount >= 3
+              ? 'bg-gradient-to-br from-green-500 to-green-700 text-white border-0'
+              : 'bg-gradient-to-br from-red-500 to-red-700 text-white border-0'
+          }`}
+        >
           {emailValidation.validCount} participant{emailValidation.validCount !== 1 ? 's' : ''}
         </Badge>
       </div>
       {emailValidation.errors.length > 0 && (
-        <div className="space-y-1">
+        <div className="space-y-2 mt-3">
           {emailValidation.errors.map((error, index) => (
-            <FormMessage key={index}>{error}</FormMessage>
+            <div key={index} className="flex items-start gap-2 p-3 rounded-lg bg-gradient-to-br from-red-100/60 to-red-300/30 border-2 border-red-500 shadow-subtle">
+              <X className="h-4 w-4 text-red-700 mt-0.5 flex-shrink-0" />
+              <FormMessage className="text-sm font-medium text-red-800">{error}</FormMessage>
+            </div>
           ))}
         </div>
       )}

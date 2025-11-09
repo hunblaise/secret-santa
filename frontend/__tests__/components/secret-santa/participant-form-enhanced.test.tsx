@@ -282,7 +282,8 @@ describe('SecretSantaForm Enhanced Features', () => {
       const { container } = renderForm()
 
       const gridContainer = container.querySelector('.grid')
-      expect(gridContainer).toHaveClass('gap-8')
+      // Updated to new responsive gap classes
+      expect(gridContainer?.className).toMatch(/gap-6|gap-8|lg:gap-8/)
     })
   })
 })

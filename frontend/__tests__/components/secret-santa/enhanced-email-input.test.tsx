@@ -51,8 +51,10 @@ describe('EnhancedEmailInput', () => {
 
     expect(screen.getByText('Email Addresses')).toBeInTheDocument()
     expect(screen.getByPlaceholderText('Enter emails...')).toBeInTheDocument()
-    expect(screen.getByText(/Enter one email address per line • 0 valid participants/)).toBeInTheDocument()
-    expect(screen.getByText('0 participants')).toBeInTheDocument()
+    // Text is now split across multiple elements in new design
+    expect(screen.getByText(/Enter one email address per line/)).toBeInTheDocument()
+    expect(screen.getByText(/0.*valid participants/)).toBeInTheDocument()
+    expect(screen.getByText(/0.*participant/)).toBeInTheDocument()
   })
 
   it('should validate single valid email', async () => {
@@ -183,19 +185,21 @@ describe('EnhancedEmailInput', () => {
     renderEnhancedInput()
 
     const textarea = screen.getByPlaceholderText('Enter emails...')
-    
-    // Less than 3 participants - secondary badge
+
+    // Less than 3 participants - red gradient badge (new design)
     await user.type(textarea, 'john@example.com\njane@example.com')
     await waitFor(() => {
       const badge = screen.getByText('2 participants')
-      expect(badge).toHaveClass('bg-secondary')
+      // New design uses gradient background
+      expect(badge.className).toMatch(/bg-gradient-to-br.*from-red-500/)
     })
 
-    // 3 or more participants - default badge
+    // 3 or more participants - green gradient badge (new design)
     await user.type(textarea, '\nbob@example.com')
     await waitFor(() => {
       const badge = screen.getByText('3 participants')
-      expect(badge).toHaveClass('bg-primary')
+      // New design uses green gradient for success
+      expect(badge.className).toMatch(/bg-gradient-to-br.*from-green-500/)
     })
   })
 
