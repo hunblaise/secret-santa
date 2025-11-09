@@ -41,6 +41,9 @@ public class TransactionalMailingService {
     @Value("${secret-santa.email.batch.enabled:true}")
     private boolean batchEnabled;
 
+    @Value("${secret-santa.email.from:noreply@secretsanta.com}")
+    private String fromAddress;
+
     @Autowired
     public TransactionalMailingService(JavaMailSender javaMailSender) {
         this.javaMailSender = javaMailSender;
@@ -167,12 +170,13 @@ public class TransactionalMailingService {
      */
     private SimpleMailMessage createEmailMessage(Pair pair, Map<String, String> nameMapping) {
         SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromAddress);
         message.setTo(pair.getFrom());
         message.setSubject(MAIL_SUBJECT);
-        
+
         String fromName = getDisplayName(pair.getFrom(), nameMapping);
         String toName = getDisplayName(pair.getTo(), nameMapping);
-        
+
         message.setText(String.format(MAIL_TEXT, fromName, toName));
         return message;
     }
