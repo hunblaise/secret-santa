@@ -43,10 +43,10 @@ public class TransactionalMailingService {
                 <table role="presentation" style="width: 100%%; border-collapse: collapse; padding: 40px 20px;">
                     <tr>
                         <td align="center">
-                            <table role="presentation" style="max-width: 600px; width: 100%%; border-collapse: collapse; background: linear-gradient(to bottom, rgba(244, 240, 187, 0.15) 0%%, rgba(255, 255, 255, 0.95) 100%%); border-radius: 16px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(255, 255, 255, 0.08) inset; overflow: hidden;">
+                            <table role="presentation" style="max-width: 600px; width: 100%%; border-collapse: collapse; background: linear-gradient(to bottom, rgba(244, 240, 187, 0.15) 0%%, rgba(255, 255, 255, 0.95) 100%%%%); border-radius: 16px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(255, 255, 255, 0.08) inset; overflow: hidden;">
                                 <!-- Header with festive gradient -->
                                 <tr>
-                                    <td style="background: linear-gradient(135deg, #DA2C38 0%%, #87C38F 100%%); padding: 32px 24px; text-align: center;">
+                                    <td style="background: linear-gradient(135deg, #DA2C38 0%%, #87C38F 100%%%%); padding: 32px 24px; text-align: center;">
                                         <!-- Yeti Emoji -->
                                         <div style="font-size: 64px; margin-bottom: 16px; line-height: 1;">
                                             🎅
@@ -74,10 +74,10 @@ public class TransactionalMailingService {
                                         </p>
 
                                         <!-- Recipient Card -->
-                                        <table role="presentation" style="width: 100%%; border-collapse: collapse; background: linear-gradient(to bottom right, rgba(135, 195, 143, 0.12) 0%%, rgba(244, 240, 187, 0.08) 100%%); border: 2px solid #87C38F; border-radius: 12px; padding: 24px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(255, 255, 255, 0.1) inset;">
+                                        <table role="presentation" style="width: 100%%; border-collapse: collapse; background: linear-gradient(to bottom right, rgba(135, 195, 143, 0.12) 0%%, rgba(244, 240, 187, 0.08) 100%%%%); border: 2px solid #87C38F; border-radius: 12px; padding: 24px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(255, 255, 255, 0.1) inset;">
                                             <tr>
                                                 <td align="center">
-                                                    <div style="display: inline-block; background: linear-gradient(135deg, #DA2C38 0%%, #87C38F 100%%); color: #FFFFFF; font-size: 32px; width: 56px; height: 56px; border-radius: 50%%; line-height: 56px; text-align: center; margin-bottom: 16px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);">
+                                                    <div style="display: inline-block; background: linear-gradient(135deg, #DA2C38 0%%, #87C38F 100%%%%); color: #FFFFFF; font-size: 32px; width: 56px; height: 56px; border-radius: 50%%%%; line-height: 56px; text-align: center; margin-bottom: 16px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);">
                                                         🎁
                                                     </div>
                                                     <h3 style="margin: 0; font-size: 28px; font-weight: 700; color: #43291F; line-height: 1.3;">
@@ -96,7 +96,7 @@ public class TransactionalMailingService {
 
                                 <!-- Footer -->
                                 <tr>
-                                    <td style="background: linear-gradient(to bottom, rgba(67, 41, 31, 0.03) 0%%, rgba(67, 41, 31, 0.06) 100%%); padding: 24px 32px; text-align: center; border-top: 1px solid rgba(67, 41, 31, 0.1);">
+                                    <td style="background: linear-gradient(to bottom, rgba(67, 41, 31, 0.03) 0%%, rgba(67, 41, 31, 0.06) 100%%%%); padding: 24px 32px; text-align: center; border-top: 1px solid rgba(67, 41, 31, 0.1);">
                                         <p style="margin: 0; font-size: 13px; color: #6B5B52; line-height: 1.5;">
                                             Ez egy automatikusan generált üzenet a Secret Santa rendszerből.
                                         </p>
