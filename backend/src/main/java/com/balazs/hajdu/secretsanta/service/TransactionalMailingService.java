@@ -30,86 +30,7 @@ public class TransactionalMailingService {
     private static final String MAIL_SUBJECT = "Wellhello Télapó";
     private static final String MAIL_TEXT = "Kedves %s!\nAz ajándékot az alábbi személynek kell készítened: %s";
 
-    // HTML email template matching frontend Christmas design system
-    private static final String MAIL_HTML_TEMPLATE = """
-            <!DOCTYPE html>
-            <html lang="hu">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Secret Santa</title>
-            </head>
-            <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif; background: linear-gradient(135deg, #FFFFFF 0%%, #F9F7F4 100%); -webkit-font-smoothing: antialiased;">
-                <table role="presentation" style="width: 100%%; border-collapse: collapse; padding: 40px 20px;">
-                    <tr>
-                        <td align="center">
-                            <table role="presentation" style="max-width: 600px; width: 100%%; border-collapse: collapse; background: linear-gradient(to bottom, rgba(244, 240, 187, 0.15) 0%%, rgba(255, 255, 255, 0.95) 100%%%%); border-radius: 16px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(255, 255, 255, 0.08) inset; overflow: hidden;">
-                                <!-- Header with festive gradient -->
-                                <tr>
-                                    <td style="background: linear-gradient(135deg, #DA2C38 0%%, #87C38F 100%%%%); padding: 32px 24px; text-align: center;">
-                                        <!-- Yeti Emoji -->
-                                        <div style="font-size: 64px; margin-bottom: 16px; line-height: 1;">
-                                            🎅
-                                        </div>
-                                        <h1 style="margin: 0; font-size: 32px; font-weight: 700; color: #FFFFFF; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);">
-                                            Secret Santa
-                                        </h1>
-                                        <p style="margin: 8px 0 0 0; font-size: 14px; color: rgba(255, 255, 255, 0.95); font-weight: 500;">
-                                            Mikulás ajándékozás
-                                        </p>
-                                    </td>
-                                </tr>
-
-                                <!-- Main Content -->
-                                <tr>
-                                    <td style="padding: 40px 32px;">
-                                        <!-- Greeting -->
-                                        <h2 style="margin: 0 0 24px 0; font-size: 24px; font-weight: 600; color: #43291F; line-height: 1.4;">
-                                            Kedves %s!
-                                        </h2>
-
-                                        <!-- Message -->
-                                        <p style="margin: 0 0 32px 0; font-size: 16px; color: #6B5B52; line-height: 1.6;">
-                                            Az ajándékot az alábbi személynek kell készítened:
-                                        </p>
-
-                                        <!-- Recipient Card -->
-                                        <table role="presentation" style="width: 100%%; border-collapse: collapse; background: linear-gradient(to bottom right, rgba(135, 195, 143, 0.12) 0%%, rgba(244, 240, 187, 0.08) 100%%%%); border: 2px solid #87C38F; border-radius: 12px; padding: 24px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(255, 255, 255, 0.1) inset;">
-                                            <tr>
-                                                <td align="center">
-                                                    <div style="display: inline-block; background: linear-gradient(135deg, #DA2C38 0%%, #87C38F 100%%%%); color: #FFFFFF; font-size: 32px; width: 56px; height: 56px; border-radius: 50%%%%; line-height: 56px; text-align: center; margin-bottom: 16px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);">
-                                                        🎁
-                                                    </div>
-                                                    <h3 style="margin: 0; font-size: 28px; font-weight: 700; color: #43291F; line-height: 1.3;">
-                                                        %s
-                                                    </h3>
-                                                </td>
-                                            </tr>
-                                        </table>
-
-                                        <!-- Closing Message -->
-                                        <p style="margin: 32px 0 0 0; font-size: 15px; color: #6B5B52; line-height: 1.6; text-align: center; font-style: italic;">
-                                            Boldog ünnepeket! 🎄✨
-                                        </p>
-                                    </td>
-                                </tr>
-
-                                <!-- Footer -->
-                                <tr>
-                                    <td style="background: linear-gradient(to bottom, rgba(67, 41, 31, 0.03) 0%%, rgba(67, 41, 31, 0.06) 100%%%%); padding: 24px 32px; text-align: center; border-top: 1px solid rgba(67, 41, 31, 0.1);">
-                                        <p style="margin: 0; font-size: 13px; color: #6B5B52; line-height: 1.5;">
-                                            Ez egy automatikusan generált üzenet a Secret Santa rendszerből.
-                                        </p>
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-                </table>
-            </body>
-            </html>
-            """;
-
+    private final EmailTemplateService emailTemplateService;
     private final Resend resendClient;
 
     @Value("${secret-santa.email.retry.attempts:3}")
@@ -124,8 +45,10 @@ public class TransactionalMailingService {
     @Value("${secret-santa.email.from:noreply@secretsanta.com}")
     private String fromAddress;
 
-    public TransactionalMailingService(@Value("${resend.api.key}") String resendApiKey) {
+    public TransactionalMailingService(@Value("${resend.api.key}") String resendApiKey,
+                                      EmailTemplateService emailTemplateService) {
         this.resendClient = new Resend(resendApiKey);
+        this.emailTemplateService = emailTemplateService;
         LOGGER.info("Resend client initialized with API key");
     }
 
@@ -143,7 +66,7 @@ public class TransactionalMailingService {
         }
 
         return sendEmailsWithRetry(pairs, nameMapping)
-                .doOnSuccess(results -> logEmailResults(results))
+                .doOnSuccess(this::logEmailResults)
                 .doOnError(error -> LOGGER.error("Batch email delivery failed: {}", error.getMessage()));
     }
 
@@ -198,8 +121,8 @@ public class TransactionalMailingService {
             // Plain text version for fallback
             String emailText = String.format(MAIL_TEXT, fromName, toName);
 
-            // HTML version with beautiful Christmas design
-            String emailHtml = String.format(MAIL_HTML_TEMPLATE, fromName, toName);
+            // HTML version with beautiful Christmas design from external template
+            String emailHtml = emailTemplateService.buildSecretSantaEmail(fromName, toName);
 
             CreateEmailOptions emailOptions = CreateEmailOptions.builder()
                     .from(fromAddress)
