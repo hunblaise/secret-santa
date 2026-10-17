@@ -1,12 +1,17 @@
-Could you pl# Secret Santa Frontend
+# Secret Santa Frontend
 
 This is a [Next.js](https://nextjs.org) frontend for the Secret Santa application, built with ShadCN/UI components.
 
+The frontend uses Next.js 16, React 19, and Vitest 5. Dependencies are pinned by `package-lock.json`.
+
+The dependency update leaves one known unpatched development-tool issue: `braces` (GHSA-vfj7-8cjw-p6xm), pulled in by the Next.js ESLint plugin through `fast-glob` and `micromatch`. npm reports this as five high-severity entries along the dependency chain. ESLint remains on 9 because the current Next.js plugins do not support ESLint 10.
+
 ## Getting Started
 
-First, run the development server:
+Use Node.js 24 (see `.nvmrc`), install the locked dependencies, then run the development server:
 
 ```bash
+npm ci
 npm run dev
 ```
 
@@ -18,7 +23,7 @@ This project uses Vitest with React Testing Library for testing:
 
 ```bash
 # Run tests once
-npm run test
+npm test -- --run
 
 # Run tests in watch mode
 npm run test:watch
@@ -38,6 +43,9 @@ npm run build
 
 # Run linting
 npm run lint
+
+# Check TypeScript
+npm run typecheck
 ```
 
 ## Learn More

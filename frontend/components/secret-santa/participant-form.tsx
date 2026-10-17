@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Gift, Users, Mail, Settings, ChevronDown, ChevronUp } from 'lucide-react'
@@ -67,7 +67,7 @@ export function SecretSantaForm({ onResults, isLoading, setIsLoading }: SecretSa
     },
   })
 
-  const emailsText = form.watch('emailsText')
+  const { emailsText = '', exclusions, forcedPairings, nameMappings, sendEmails } = useWatch({ control: form.control })
   const emailCount = parseEmails(emailsText || '').length
 
   const onSubmit = async (data: FormData) => {
@@ -176,19 +176,19 @@ export function SecretSantaForm({ onResults, isLoading, setIsLoading }: SecretSa
                         {/* Quick preview badges when collapsed */}
                         {!showAdvanced && (
                           <div className="flex gap-1">
-                            {(form.watch('exclusions')?.length || 0) > 0 && (
+                            {(exclusions?.length || 0) > 0 && (
                               <Badge variant="secondary" className="text-xs">
-                                {form.watch('exclusions')?.length} exclusion{(form.watch('exclusions')?.length || 0) !== 1 ? 's' : ''}
+                                {exclusions?.length} exclusion{(exclusions?.length || 0) !== 1 ? 's' : ''}
                               </Badge>
                             )}
-                            {(form.watch('forcedPairings')?.length || 0) > 0 && (
+                            {(forcedPairings?.length || 0) > 0 && (
                               <Badge variant="secondary" className="text-xs">
-                                {form.watch('forcedPairings')?.length} forced
+                                {forcedPairings?.length} forced
                               </Badge>
                             )}
-                            {(form.watch('nameMappings')?.length || 0) > 0 && (
+                            {(nameMappings?.length || 0) > 0 && (
                               <Badge variant="secondary" className="text-xs">
-                                {form.watch('nameMappings')?.length} names
+                                {nameMappings?.length} names
                               </Badge>
                             )}
                           </div>
@@ -303,29 +303,29 @@ export function SecretSantaForm({ onResults, isLoading, setIsLoading }: SecretSa
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Email delivery:</span>
-                    <span className={form.watch('sendEmails') ? 'text-secondary' : 'text-muted-foreground'}>
-                      {form.watch('sendEmails') ? 'Enabled' : 'Disabled'}
+                    <span className={sendEmails ? 'text-secondary' : 'text-muted-foreground'}>
+                      {sendEmails ? 'Enabled' : 'Disabled'}
                     </span>
                   </div>
                   
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Exclusions:</span>
                     <span className="text-foreground">
-                      {form.watch('exclusions')?.length || 0}
+                      {exclusions?.length || 0}
                     </span>
                   </div>
                   
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Forced pairs:</span>
                     <span className="text-foreground">
-                      {form.watch('forcedPairings')?.length || 0}
+                      {forcedPairings?.length || 0}
                     </span>
                   </div>
                   
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Custom names:</span>
                     <span className="text-foreground">
-                      {form.watch('nameMappings')?.length || 0}
+                      {nameMappings?.length || 0}
                     </span>
                   </div>
                 </div>
@@ -335,13 +335,13 @@ export function SecretSantaForm({ onResults, isLoading, setIsLoading }: SecretSa
                   <div className="pt-2 border-t">
                     <p className="text-xs text-muted-foreground mb-2">Advanced settings active:</p>
                     <div className="flex flex-wrap gap-1">
-                      {(form.watch('exclusions')?.length || 0) > 0 && (
+                      {(exclusions?.length || 0) > 0 && (
                         <Badge variant="outline" className="text-xs">Exclusions</Badge>
                       )}
-                      {(form.watch('forcedPairings')?.length || 0) > 0 && (
+                      {(forcedPairings?.length || 0) > 0 && (
                         <Badge variant="outline" className="text-xs">Forced Pairs</Badge>
                       )}
-                      {(form.watch('nameMappings')?.length || 0) > 0 && (
+                      {(nameMappings?.length || 0) > 0 && (
                         <Badge variant="outline" className="text-xs">Names</Badge>
                       )}
                     </div>

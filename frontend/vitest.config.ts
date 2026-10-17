@@ -9,10 +9,13 @@ export default defineConfig({
     setupFiles: ['./vitest.setup.ts'],
     css: true,
     globals: true,
+    // Typing full participant lists can exceed the default timeout on Windows.
+    testTimeout: 15000,
+    maxWorkers: 2,
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './'),
+      '@': path.resolve(import.meta.dirname, './'),
     },
   },
 })

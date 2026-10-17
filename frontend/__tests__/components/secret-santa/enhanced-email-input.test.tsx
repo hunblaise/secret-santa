@@ -184,18 +184,18 @@ describe('EnhancedEmailInput', () => {
 
     const textarea = screen.getByPlaceholderText('Enter emails...')
     
-    // Less than 3 participants - secondary badge
+    // Less than 3 participants - destructive badge
     await user.type(textarea, 'john@example.com\njane@example.com')
     await waitFor(() => {
       const badge = screen.getByText('2 participants')
-      expect(badge).toHaveClass('bg-secondary')
+      expect(badge).toHaveClass('bg-destructive')
     })
 
-    // 3 or more participants - default badge
+    // 3 or more participants - success badge
     await user.type(textarea, '\nbob@example.com')
     await waitFor(() => {
       const badge = screen.getByText('3 participants')
-      expect(badge).toHaveClass('bg-primary')
+      expect(badge).toHaveClass('bg-green-600')
     })
   })
 

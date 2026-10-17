@@ -1,6 +1,6 @@
-import { render, screen, fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { useForm } from 'react-hook-form'
+import { useForm, type UseFormReturn } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
@@ -108,7 +108,7 @@ describe('AdvancedOptions Component', () => {
     })
 
     it('shows form error when form prop is null', () => {
-      render(<AdvancedOptions form={null as any} emailsText="test@example.com" />)
+      render(<AdvancedOptions form={null as unknown as UseFormReturn<FormData>} emailsText="test@example.com" />)
       
       expect(screen.getByText(/form configuration error/i)).toBeInTheDocument()
     })
@@ -127,7 +127,7 @@ describe('AdvancedOptions Component', () => {
     it('falls back to timestamp-based ID when crypto.randomUUID unavailable', async () => {
       // Temporarily remove crypto
       const originalCrypto = global.crypto
-      delete (global as any).crypto
+      Reflect.deleteProperty(global, 'crypto')
       
       render(<TestWrapper />)
       

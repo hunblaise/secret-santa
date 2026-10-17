@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import axios from 'axios'
+import axios, { type AxiosInstance } from 'axios'
 import { SecretSantaRequest, SecretSantaResponse } from '../../lib/types'
 
 // Create a mock axios instance
@@ -15,13 +15,13 @@ vi.mock('axios', () => ({
   },
 }))
 
-const mockedAxios = vi.mocked(axios)
+const mockedAxios = vi.mocked(axios, true)
 
 describe('secretSantaApi', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
     // Ensure axios.create returns our mock
-    mockedAxios.create.mockReturnValue(mockAxiosInstance as any)
+    mockedAxios.create.mockReturnValue(mockAxiosInstance as unknown as AxiosInstance)
   })
 
   afterEach(() => {

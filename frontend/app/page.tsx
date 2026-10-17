@@ -12,9 +12,9 @@ function Snowflake({ delay = 0 }: { delay?: number }) {
     <div 
       className="snowflake animate-snowfall text-2xl absolute"
       style={{ 
-        left: `${Math.random() * 100}%`,
+        left: `${(delay * 137.5 + 7) % 100}%`,
         animationDelay: `${delay}s`,
-        animationDuration: `${3 + Math.random() * 2}s`
+        animationDuration: `${3 + (delay * 0.7) % 2}s`
       }}
     >
       ❄

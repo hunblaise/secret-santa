@@ -17,12 +17,12 @@ function Confetti({ delay = 0 }: { delay?: number }) {
     <div 
       className="absolute animate-confetti text-xl"
       style={{ 
-        left: `${Math.random() * 100}%`,
+        left: `${(delay * 137.5 + 7) % 100}%`,
         animationDelay: `${delay}s`,
-        animationDuration: `${2 + Math.random()}s`
+        animationDuration: `${2 + (delay * 0.7) % 1}s`
       }}
     >
-      {['🎁', '🎄', '⭐', '❄️', '🎅'][Math.floor(Math.random() * 5)]}
+      {['🎁', '🎄', '⭐', '❄️', '🎅'][Math.round(delay * 10) % 5]}
     </div>
   )
 }
@@ -35,15 +35,20 @@ interface ResultsDisplayProps {
 
 export function ResultsDisplay({ results, onReset, celebrationDuration = 4000 }: ResultsDisplayProps) {
   const { toast } = useToast()
-  const [showCelebration, setShowCelebration] = useState(false)
+  const [showCelebration, setShowCelebration] = useState(
+    () => results.pairs.length > 0 && results.errors.length === 0
+  )
 
   // Trigger celebration animation on mount if successful
   useEffect(() => {
     const isSuccess = results.pairs.length > 0 && results.errors.length === 0
     if (isSuccess) {
-      setShowCelebration(true)
+      const start = setTimeout(() => setShowCelebration(true), 0)
       const timeout = setTimeout(() => setShowCelebration(false), celebrationDuration)
-      return () => clearTimeout(timeout)
+      return () => {
+        clearTimeout(start)
+        clearTimeout(timeout)
+      }
     }
   }, [results, celebrationDuration])
 
