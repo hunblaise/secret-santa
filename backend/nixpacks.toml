@@ -1,0 +1,3 @@
+# Match pom.xml's Java release for both compilation and runtime.
+[phases.setup]
+nixPkgs = ["jdk21", "maven"]
