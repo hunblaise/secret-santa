@@ -10,12 +10,18 @@ import com.resend.services.emails.model.CreateEmailResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.resend.core.net.RequestOptions;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+import reactor.util.retry.Retry;
+import java.time.Duration;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -45,9 +51,14 @@ public class TransactionalMailingService {
     @Value("${secret-santa.email.from:noreply@secretsanta.com}")
     private String fromAddress;
 
+    @Autowired
     public TransactionalMailingService(@Value("${resend.api.key}") String resendApiKey,
                                       EmailTemplateService emailTemplateService) {
-        this.resendClient = new Resend(resendApiKey);
+        this(new Resend(resendApiKey), emailTemplateService);
+    }
+
+    TransactionalMailingService(Resend resendClient, EmailTemplateService emailTemplateService) {
+        this.resendClient = resendClient;
         this.emailTemplateService = emailTemplateService;
         LOGGER.info("Resend client initialized with API key");
     }
@@ -57,7 +68,6 @@ public class TransactionalMailingService {
      * Returns detailed status for each email delivery attempt.
      */
     public Mono<Map<String, EmailResult>> sendAllEmails(List<Pair> pairs, Map<String, String> nameMapping) {
-        LOGGER.info("Starting transactional email delivery for {} pairs using Resend HTTP API", pairs.size());
 
         // Return empty results immediately for empty pairs list
         if (pairs == null || pairs.isEmpty()) {
@@ -65,7 +75,7 @@ public class TransactionalMailingService {
             return Mono.just(new ConcurrentHashMap<>());
         }
 
-        return sendEmailsWithRetry(pairs, nameMapping)
+        return Mono.defer(() -> sendEmailsWithRetry(pairs, nameMapping))
                 .doOnSuccess(this::logEmailResults)
                 .doOnError(error -> LOGGER.error("Batch email delivery failed: {}", error.getMessage()));
     }
@@ -91,7 +101,7 @@ public class TransactionalMailingService {
         LOGGER.debug("Sending {} emails in batch mode (individual requests with retry)", pairs.size());
 
         return Flux.fromIterable(pairs)
-                .flatMap(pair -> sendSingleEmailWithRetry(pair, nameMapping, results))
+                .flatMap(pair -> sendSingleEmailWithRetry(pair, nameMapping, results), 2)
                 .then(Mono.just(results));
     }
 
@@ -103,7 +113,7 @@ public class TransactionalMailingService {
         LOGGER.debug("Sending {} emails individually with retry", pairs.size());
 
         return Flux.fromIterable(pairs)
-                .flatMap(pair -> sendSingleEmailWithRetry(pair, nameMapping, results))
+                .concatMap(pair -> sendSingleEmailWithRetry(pair, nameMapping, results))
                 .then(Mono.just(results));
     }
 
@@ -113,6 +123,8 @@ public class TransactionalMailingService {
     private Mono<Void> sendSingleEmailWithRetry(Pair pair, Map<String, String> nameMapping,
                                                Map<String, EmailResult> results) {
         results.put(pair.getFrom(), EmailResult.PENDING);
+        RequestOptions requestOptions = RequestOptions.builder()
+                .setIdempotencyKey(UUID.randomUUID().toString()).build();
 
         return Mono.fromCallable(() -> {
             String fromName = getDisplayName(pair.getFrom(), nameMapping);
@@ -133,21 +145,24 @@ public class TransactionalMailingService {
                     .build();
 
             try {
-                CreateEmailResponse response = resendClient.emails().send(emailOptions);
+                CreateEmailResponse response = resendClient.emails().send(emailOptions, requestOptions);
                 results.put(pair.getFrom(), EmailResult.DELIVERED);
                 LOGGER.debug("Email sent successfully to {} (ID: {})", pair.getFrom(), response.getId());
                 return response;
             } catch (ResendException e) {
                 LOGGER.error("Failed to send email to {}: {}", pair.getFrom(), e.getMessage());
-                throw new RuntimeException("Resend API error: " + e.getMessage(), e);
+                throw e;
             }
         })
-        .retry(retryAttempts)
-        .doOnError(error -> LOGGER.warn("Retrying email to {} due to error: {}", pair.getFrom(), error.getMessage()))
+        .subscribeOn(Schedulers.boundedElastic())
+        .retryWhen(Retry.backoff(Math.max(0, retryAttempts), Duration.ofMillis(Math.max(1, retryDelayMs)))
+                .filter(error -> error instanceof ResendException resendError
+                        && (resendError.getStatusCode() == null || resendError.getStatusCode() == 429
+                        || resendError.getStatusCode() >= 500)))
         .onErrorResume(error -> {
             results.put(pair.getFrom(), EmailResult.FAILED);
-            LOGGER.error("Failed to send email to {} after {} attempts: {}",
-                        pair.getFrom(), retryAttempts, error.getMessage());
+            LOGGER.error("Failed to send email to {} after at most {} attempts: {}",
+                        pair.getFrom(), retryAttempts + 1, error.getMessage());
             return Mono.empty(); // Continue with other emails
         })
         .then();

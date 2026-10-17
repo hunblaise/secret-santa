@@ -110,7 +110,7 @@ class HamiltonianTourServiceTest {
     }
     
     @Test
-    void shouldHandleImpossibleGraphWithFallback() {
+    void shouldRejectImpossibleGraphWithoutPartialAssignments() {
         // given - impossible graph where no Hamiltonian cycle exists
         Vertex alice = new Vertex("alice");
         Vertex bob = new Vertex("bob");
@@ -125,14 +125,9 @@ class HamiltonianTourServiceTest {
         // when
         Flux<Pair> pairs = service.generateSecretSantaPairs(graph);
 
-        // then - should use fallback strategy
-        List<Pair> actual = pairs.collectList().block();
-        assertNotNull(actual);
-        
-        // Should have created some assignments, but not a perfect cycle
-        assertTrue(actual.size() >= 2); // At least Alice->Bob and Bob->Charlie
-        assertThat(actual, hasItem(new Pair("alice", "bob")));
-        assertThat(actual, hasItem(new Pair("bob", "charlie")));
+        reactor.test.StepVerifier.create(pairs)
+                .expectError(IllegalArgumentException.class)
+                .verify();
     }
     
     @Test
@@ -160,9 +155,33 @@ class HamiltonianTourServiceTest {
         Flux<Pair> pairs = service.generateSecretSantaPairs(graph);
 
         // then
-        List<Pair> actual = pairs.collectList().block();
-        assertNotNull(actual);
-        assertTrue(actual.isEmpty()); // No valid assignment possible
+        reactor.test.StepVerifier.create(pairs)
+                .expectError(IllegalArgumentException.class)
+                .verify();
+    }
+
+    @Test
+    void shouldRespectExplicitConstraintsIncludingForcedClosingEdge() {
+        Vertex a = new Vertex("a");
+        Vertex b = new Vertex("b");
+        Vertex c = new Vertex("c");
+        Graph graph = new Graph(Map.of(a, List.of(b, c), b, List.of(a, c), c, List.of(a, b)));
+        for (int attempt = 0; attempt < 20; attempt++) {
+            List<Pair> pairs = service.generateSecretSantaPairs(graph, Map.of("a", List.of("c")),
+                    Map.of("a", "b", "b", "c", "c", "a")).collectList().block();
+            assertEquals(Set.of(new Pair("a", "b"), new Pair("b", "c"), new Pair("c", "a")),
+                    new HashSet<>(pairs));
+        }
+    }
+
+    @Test
+    void shouldNeverFallBackToPairsThatViolateExplicitConstraints() {
+        Vertex a = new Vertex("a");
+        Vertex b = new Vertex("b");
+        Graph graph = new Graph(Map.of(a, List.of(b), b, List.of(a)));
+        reactor.test.StepVerifier.create(service.generateSecretSantaPairs(graph,
+                        Map.of("a", List.of("b")), Map.of()))
+                .expectError(IllegalArgumentException.class).verify();
     }
     
     /**

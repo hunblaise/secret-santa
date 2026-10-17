@@ -17,6 +17,41 @@ class GraphMappingServiceTest {
 
     private GraphMappingService victim;
 
+    @Test
+    void shouldRejectConflictingForcedPair() {
+        SecretSantaRequest request = new SecretSantaRequest();
+        request.setEmails(List.of("a", "b", "c"));
+        request.setExclusions(Map.of("a", List.of("b")));
+        request.setCheats(Map.of("a", "b"));
+        reactor.test.StepVerifier.create(victim.generateGraph(request))
+                .expectError(IllegalArgumentException.class).verify();
+    }
+
+    @Test
+    void shouldRejectDuplicateParticipants() {
+        SecretSantaRequest request = new SecretSantaRequest();
+        request.setEmails(List.of("a", "a", "b"));
+        reactor.test.StepVerifier.create(victim.generateGraph(request))
+                .expectError(IllegalArgumentException.class).verify();
+    }
+
+    @Test
+    void shouldRejectUnknownForcedRecipientAndSelfAssignment() {
+        for (String receiver : List.of("outside", "a")) {
+            SecretSantaRequest request = new SecretSantaRequest();
+            request.setEmails(List.of("a", "b"));
+            request.setCheats(Map.of("a", receiver));
+            reactor.test.StepVerifier.create(victim.generateGraph(request))
+                    .expectError(IllegalArgumentException.class).verify();
+        }
+    }
+
+    @Test
+    void shouldRejectMissingParticipantsReactively() {
+        reactor.test.StepVerifier.create(victim.generateGraph(new SecretSantaRequest()))
+                .expectError(IllegalArgumentException.class).verify();
+    }
+
     @BeforeEach
     void setUp() {
         victim = new GraphMappingService();
