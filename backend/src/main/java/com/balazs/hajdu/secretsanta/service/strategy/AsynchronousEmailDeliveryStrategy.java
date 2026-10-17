@@ -39,7 +39,7 @@ public class AsynchronousEmailDeliveryStrategy implements EmailDeliveryStrategy 
         transactionalMailingService.sendAllEmails(pairs, nameMapping)
                 .doOnSuccess(results -> LOGGER.info("Async email delivery completed"))
                 .doOnError(error -> LOGGER.error("Async email delivery failed: {}", error.getMessage()))
-                .subscribe();
+                .subscribe(results -> { }, error -> LOGGER.error("Background delivery terminated", error));
         
         // Return immediately with pending status for all emails
         Map<String, EmailResult> pendingResults = pairs.stream()

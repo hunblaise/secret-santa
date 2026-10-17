@@ -1,41 +1,70 @@
 # 🎅 Secret Santa Generator
 
-A modern Spring Boot application that generates optimal Secret Santa gift assignments using advanced graph theory algorithms. Each participant gives exactly one gift and receives exactly one gift, with support for exclusions and predetermined assignments.
+A modern full-stack Secret Santa experience featuring a festive Next.js frontend and a graph-theory powered Spring Boot backend. Participants can generate balanced gift exchanges with real-time validation, exclusions, forced pairings, and optional email delivery.
 
 ## ✨ Features
 
-- **🔄 Guaranteed Valid Assignments**: Uses real Hamiltonian cycle algorithm to ensure everyone participates
+- **🌟 Intuitive Frontend Experience**: Responsive Christmas-themed UI with real-time validation, accessibility focus, and advanced configuration tabs
+- **🔄 Guaranteed Valid Assignments**: Hamiltonian-cycle search ensures everyone gives and receives exactly one gift
 - **🚫 Exclusion Support**: Prevent specific people from drawing each other (e.g., couples, family members)
-- **🎯 Predetermined Assignments**: Force specific gift-giving relationships ("cheats")
-- **📧 Transactional Email**: All emails succeed or clear failure reporting with retry logic
-- **🌐 Reactive API**: Built with Spring WebFlux for scalable, non-blocking operations  
-- **🛡️ Robust Error Handling**: Graceful fallback when perfect assignments aren't possible
-- **⚡ Flexible Delivery**: Support for both synchronous (transactional) and asynchronous email modes
+- **🎯 Forced Pairings**: Allow predetermined "cheat" assignments that must occur
+- **🏷️ Display Name Mapping**: Replace emails with custom names for friendlier announcements
+- **📧 Transactional Email Delivery**: Optional Resend HTTP API integration with delayed retries and delivery results
+- **🛡️ Robust Error Handling**: Explicit failure when a complete cycle is impossible, clear toast/error messaging
+
+## 🧰 Technology Stack
+
+### Frontend
+- **Next.js 16.4.2** with Turbopack development server
+- **React 19 + TypeScript** for type-safe component authoring
+- **shadcn/ui** + Radix primitives with Tailwind CSS design system
+- **React Hook Form + Zod** for form state and validation
+- **Vitest** + Testing Library for component/integration tests
+- **Lucide React** & **Sonner** for icons and toasts
+
+### Backend
+- **Spring Boot 4.1.1** (WebFlux) running on **Java 21 LTS**
+- **Graph-based assignment algorithm** with constraint propagation
+- **Resend Java SDK 4.28.0** for email notifications
+- **Maven** build with **JaCoCo**, **Mockito 5**, and **Jib 3.4.6** for Docker images
 
 ## 🚀 Quick Start
 
 ### Prerequisites
+- **Java 21 LTS** and **Maven 3.9+** (wrapper included)
+- **Node.js 24.22.0 LTS** (see `.nvmrc`) with **npm**
+- (Optional) Resend API key and a verified sender domain for email delivery
 
-- **Java 21 LTS** or later
-- **Maven 3.9+** (or use included wrapper)
-
-### Running the Application
-
+### 1. Clone and install
 ```bash
-# Clone the repository
 git clone <repository-url>
 cd secret-santa
 
-# Run the application
-./mvnw spring-boot:run
+# Backend dependencies are resolved on demand by Maven wrapper
+
+# Frontend dependencies
+cd frontend
+npm install
+cd ..
 ```
 
-The application will start on `http://localhost:8080`
+### 2. Run the stack locally
+```bash
+# Terminal 1 - Backend
+cd backend
+./mvnw spring-boot:run
+# Serves API at http://localhost:8080
 
-### Generate Secret Santa Pairs
+# Terminal 2 - Frontend
+cd frontend
+npm run dev
+# Serves UI at http://localhost:3000
+```
 
-Send a POST request to `/generatePairs`:
+The frontend is preconfigured to call the backend at `http://localhost:8080` (CORS enabled).
 
+### 3. Generate Secret Santa pairs
+Use the web UI or call the backend directly:
 ```bash
 curl -X POST http://localhost:8080/generatePairs \
   -H "Content-Type: application/json" \
@@ -46,7 +75,7 @@ curl -X POST http://localhost:8080/generatePairs \
     },
     "mappings": {
       "alice@example.com": "Alice Smith",
-      "bob@example.com": "Bob Jones", 
+      "bob@example.com": "Bob Jones",
       "charlie@example.com": "Charlie Brown"
     },
     "cheats": {},
@@ -54,186 +83,114 @@ curl -X POST http://localhost:8080/generatePairs \
   }'
 ```
 
-**Response:**
+## 📡 API Reference
+
+### POST /generatePairs
+Generates Secret Santa assignments for a group of participants.
+
+**Request Body**
+```json
+{
+  "emails": ["string"],
+  "exclusions": {
+    "email": ["excluded_emails"]
+  },
+  "mappings": {
+    "email": "display_name"
+  },
+  "cheats": {
+    "giver_email": "receiver_email"
+  },
+  "emailSendingEnabled": true
+}
+```
+
+**Response**
 ```json
 {
   "pairs": [
-    {"from": "alice@example.com", "to": "charlie@example.com"},
-    {"from": "bob@example.com", "to": "alice@example.com"},
-    {"from": "charlie@example.com", "to": "bob@example.com"}
+    { "from": "giver@example.com", "to": "receiver@example.com" }
   ],
-  "emailStatus": "DISABLED",
-  "emailResults": {},
+  "emailStatus": "SUCCESS",
+  "emailResults": {
+    "giver@example.com": "DELIVERED"
+  },
   "errors": [],
   "timestamp": "2024-12-20T10:30:00"
 }
 ```
 
-## 📋 API Reference
-
-### POST /generatePairs
-
-Generates Secret Santa assignments for a group of participants.
-
-**Request Body:**
-```json
-{
-  "emails": ["string"],           // List of participant email addresses
-  "exclusions": {                 // Optional: people who can't give to each other
-    "email": ["excluded_emails"]
-  },
-  "mappings": {                   // Optional: email to display name mapping
-    "email": "display_name"
-  },
-  "cheats": {                     // Optional: predetermined assignments
-    "giver_email": "receiver_email"
-  },
-  "emailSendingEnabled": boolean  // Whether to send notification emails
-}
-```
-
-**Response:**
-Array of gift-giving pairs:
-```json
-[
-  {
-    "from": "giver@example.com",
-    "to": "receiver@example.com"
-  }
-]
-```
-
-## 🔧 Configuration
+## ⚙️ Configuration
 
 ### Email Setup (Optional)
-
-To enable email notifications, set these environment variables:
-
+Set your Resend API key before launching the backend:
 ```bash
-export SECRET_SANTA_GMAIL_USERNAME=your-email@gmail.com
-export SECRET_SANTA_GMAIL_PASSWORD=your-app-password
+export SECRET_SANTA_RESEND_API_KEY=re_your_api_key
 ```
 
-**Note:** Use Gmail App Passwords, not your regular password.
+Configure `secret-santa.email.from` in `backend/src/main/resources/application.properties` to use a sender on your verified Resend domain. The default test key permits local startup but cannot deliver real mail.
 
-### Application Properties
+`secret-santa.email.retry.attempts` is the number of retries after the initial attempt. Retries use exponential backoff starting at `secret-santa.email.retry.delay` milliseconds, apply only to transient errors, and reuse an idempotency key to avoid duplicate sends. API acceptance is reported as `DELIVERED`; inbox delivery is not confirmed by a webhook.
 
-The application uses Gmail SMTP by default. Modify `src/main/resources/application.properties` for different email providers:
+The API accepts 2–100 unique participants. Forced pairs must reference existing participants, cannot target oneself or reuse a recipient, and must respect exclusions. All assignments form one cycle. Difficult constraints can hit the 200,000-step search limit and return a retryable failure even when a solution exists.
 
-```properties
-spring.mail.host=smtp.gmail.com
-spring.mail.port=587
-spring.mail.username=${SECRET_SANTA_GMAIL_USERNAME}
-spring.mail.password=${SECRET_SANTA_GMAIL_PASSWORD}
-spring.mail.properties.mail.smtp.auth=true
-spring.mail.properties.mail.smtp.starttls.enable=true
-spring.mail.properties.mail.smtp.starttls.required=true
-```
+Synchronous email mode is the default. Async mode runs in memory and returns `PENDING`; use a durable queue and persisted delivery status if restart-safe processing is needed.
 
-## 🧪 Development
+## 🧪 Development Workflow
 
-### Running Tests
-
+### Backend Commands
 ```bash
-# Run all tests
-./mvnw test
-
-# Run specific test class
-./mvnw test -Dtest=HamiltonianTourServiceTest
-
-# Run with coverage report
-./mvnw clean test jacoco:report
+./mvnw clean install           # Clean build with tests
+./mvnw test                    # Run backend test suite
+./mvnw test -Dtest=ClassName   # Run specific test class or method
+./mvnw jacoco:report           # Coverage report
+./mvnw spring-boot:run         # Start API locally
+./mvnw jib:dockerBuild         # Build Docker image
+./mvnw deploy jib:build -P deploy-docker  # Build & push (requires registry access)
 ```
 
-### Building
-
+### Frontend Commands
 ```bash
-# Clean build
-./mvnw clean install
-
-# Build Docker image
-./mvnw jib:dockerBuild
+cd frontend
+npm run dev          # Start development server
+npm run build        # Production build
+npm start            # Run production build
+npm test             # Vitest suite
+npm run test:coverage
+npm run lint         # ESLint
+npm run typecheck    # TypeScript project check
 ```
-
-### Docker Deployment
-
-```bash
-# Build and push to registry
-./mvnw jib:build -P deploy-docker
-```
-
-## 🧮 Algorithm Details
-
-### Hamiltonian Cycle Approach
-
-The application uses a sophisticated **backtracking algorithm** to find valid Secret Santa assignments:
-
-1. **Graph Construction**: Participants become vertices, valid gift relationships become edges
-2. **Constraint Application**: Exclusions remove edges, cheats force specific paths
-3. **Hamiltonian Search**: Find a cycle visiting each person exactly once
-4. **Backtracking**: Try all possibilities with intelligent pruning
-5. **Fallback Strategy**: Best-effort assignment when perfect cycle impossible
-
-### Performance
-
-- **Time Complexity**: O(N!) worst case, optimized with constraint pruning
-- **Practical Performance**: Excellent for typical groups (≤20 people)
-- **Memory Usage**: O(N) space for path tracking
-
-### Guarantees
-
-✅ **Everyone participates**: Each person gives and receives exactly one gift  
-✅ **Constraints respected**: All exclusions and predetermined assignments honored  
-✅ **Deterministic**: Same input produces same output (with controlled randomization)  
-✅ **Graceful degradation**: Fallback when constraints make perfect assignment impossible  
 
 ## 📁 Project Structure
-
 ```
-src/
-├── main/java/com/balazs/hajdu/secretsanta/
-│   ├── controller/
-│   │   └── SecretSantaController.java     # REST API endpoint
-│   ├── domain/
-│   │   ├── Graph.java                     # Graph representation
-│   │   ├── Vertex.java                    # Graph vertex
-│   │   ├── request/SecretSantaRequest.java # API request model
-│   │   └── response/Pair.java             # Gift-giving pair
-│   ├── service/
-│   │   ├── GraphMappingService.java       # Converts request to graph
-│   │   ├── HamiltonianTourService.java    # Core algorithm
-│   │   ├── MailingService.java            # Email notifications
-│   │   └── hamiltonian/
-│   │       ├── ConstraintValidator.java   # Validates constraints
-│   │       └── TourState.java             # Algorithm state tracking
-│   └── SecretSantaApplication.java        # Spring Boot main class
-└── test/java/                             # Comprehensive test suite
+backend/
+  src/main/java/...            # Spring Boot services, controllers, algorithms
+  src/test/java/...            # Backend unit & integration tests
+frontend/
+  app/                         # Next.js app router
+  components/                  # UI and form components
+  lib/                         # API client, utilities, shared types
+  __tests__/                   # Vitest component/integration tests
 ```
 
-## 🏗️ Technology Stack
+## 🧮 Algorithm Highlights
+1. Build a directed graph where vertices are participants and edges represent allowed giver → receiver pairs
+2. Apply exclusions (remove edges) and forced pairings (lock edges)
+3. Execute Hamiltonian-cycle style backtracking with constraint propagation
+4. Return a structured failure with no pairs or email delivery if no complete cycle exists; a bounded search prevents runaway work
 
-- **Java 21 LTS** - Modern Java with latest features
-- **Spring Boot 3.4.5** - Web framework with reactive programming
-- **Spring WebFlux** - Reactive, non-blocking web stack
-- **Maven** - Dependency management and build
-- **JUnit 5** - Testing framework
-- **Mockito 5** - Mocking for unit tests
-- **Docker** - Containerization via Jib plugin
-
-## 🔒 Security
-
-- **No Sensitive Data**: Application doesn't store personal information
-- **Environment Variables**: Email credentials via environment variables only
-- **Input Validation**: Robust validation of all API inputs
-- **Modern Dependencies**: Updated to latest secure versions (Spring Boot 3.x, Java 21)
+## 🔒 Security & Best Practices
+- Credentials supplied via environment variables; no secrets in code
+- Input validation on both frontend (Zod) and backend (business rules)
+- Modern, maintained dependency stack across frontend and backend
+- Comprehensive testing (backend, frontend, and integration workflows)
 
 ## 🎄 Example Use Cases
-
-- **Office Holiday Parties**: Organize gift exchanges with budget constraints
-- **Family Gatherings**: Ensure cousins don't draw siblings, etc.
-- **Friend Groups**: Prevent couples from drawing each other
-- **Large Events**: Handle complex exclusion rules automatically
+- Office parties that require guaranteed unique pairings and printable results
+- Family gatherings where certain relationships must be avoided
+- Friend groups that want to force special surprise pairings
+- Large events where manual matching becomes error-prone
 
 ---
 
-**Made with ❤️ for spreading holiday joy! 🎁**
+**Made with ❤️ to spread holiday joy for every team, family, and friend group! 🎁**

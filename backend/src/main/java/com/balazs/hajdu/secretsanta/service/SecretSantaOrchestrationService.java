@@ -48,7 +48,7 @@ public class SecretSantaOrchestrationService {
      */
     public Mono<SecretSantaResponse> processSecretSantaRequest(SecretSantaRequest request) {
         LOGGER.info("Processing Secret Santa request for {} participants", 
-                   request.getEmails() != null ? request.getEmails().size() : 0);
+                   request != null && request.getEmails() != null ? request.getEmails().size() : 0);
         
         return generateSecretSantaPairs(request)
                 .flatMap(pairs -> processEmailDeliveryIfEnabled(request, pairs))
@@ -62,10 +62,11 @@ public class SecretSantaOrchestrationService {
     private Mono<List<Pair>> generateSecretSantaPairs(SecretSantaRequest request) {
         LOGGER.debug("Generating Secret Santa pairs");
         
-        return Mono.just(request)
-                .flatMap(graphMappingService::generateGraph)
+        return Mono.defer(() -> graphMappingService.generateGraph(request))
                 .flatMapMany(tourService::generateSecretSantaPairs)
                 .collectList()
+                .filter(pairs -> !pairs.isEmpty())
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("No complete assignment could be generated")))
                 .doOnSuccess(pairs -> LOGGER.debug("Generated {} Secret Santa pairs", pairs.size()));
     }
     
