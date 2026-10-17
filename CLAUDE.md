@@ -249,17 +249,50 @@ This section covers both frontend and backend architecture patterns and design p
 User Input → Form Validation → API Call → Response Processing → UI Update
 ```
 
-#### 4. Design System
-**Christmas Theme** (`app/globals.css`)
-- **Semantic Colors**: Green for success, Red for errors, maintaining Christmas aesthetic
-- **Brand Colors**: Christmas Red for CTAs, Forest Green for success states
-- **Typography**: Consistent font scales and spacing
-- **Animations**: Smooth transitions and success animations
+#### 4. Design System (2025 Redesign)
+**Advanced UI/UX Design System** (`app/globals.css`)
 
-**Component Patterns:**
-- **Composition**: Reusable components with clear interfaces
+The frontend features a sophisticated design system following professional UI/UX principles:
+
+**Layered Color System:**
+- **4-5 shade systems** for each base color (Red, Green, Gold, Neutral, Blue)
+- **Hierarchy Principle**: Darker shades = deeper layers/backgrounds, Lighter shades = elevated surfaces
+- **Semantic Mappings**: Colors include hover/active states using the shade system
+- Example: `--red-900` (deep burgundy) → `--red-500` (Christmas Red) → `--red-100` (rose)
+
+**Sophisticated Shadow System:**
+- **Dual-Shadow Technique**: Combines light (top) + dark (bottom) shadows for realism
+- **Three Depth Levels**:
+  - `.shadow-subtle`: For inputs and minor elevation
+  - `.shadow-standard`: For cards and standard surfaces
+  - `.shadow-prominent`: For hover states and emphasized elements
+- **Button-Specific Shadows**: `.shadow-button`, `.shadow-button-hover`, `.shadow-button-active`
+- **Inset Shadows**: For pressed states and input fields (`.shadow-inset`, `.shadow-inset-polished`)
+- **Light-From-Above Effect**: Simulates natural top-down lighting
+- **Dark Mode Adjustments**: All shadow levels optimized for dark backgrounds
+
+**System of Boxes Architecture:**
+- **Structured Box Hierarchy**: Clear elevation levels (Layer 0-5)
+- **Visual Depth**: Color layering + shadows create perception of depth
+- **Purposeful Responsive**: Elements rearrange intelligently, not just resize
+
+**Component Design Patterns:**
+- **Gradient Enhancements**: Subtle gradients for polished, elevated surfaces
+- **Micro-interactions**: 300ms smooth transitions for all state changes
+- **Hover States**: Shadow elevation increases, gradient shifts
+- **Focus States**: Ring glow with color transitions
+- **Active States**: Inset shadows simulate button press
 - **Accessibility**: WCAG 2.1 AA compliance with screen reader support
-- **Progressive Enhancement**: Works without JavaScript, enhanced with React
+
+**Key Design Files:**
+- `app/globals.css`: Complete color system, shadow utilities, animations
+- `components/secret-santa/`: All components use the new design system
+- `components/ui/`: shadcn/ui components styled with the system
+
+**Important Design Notes:**
+- **Avoid React Hydration Issues**: Use deterministic values (like index) instead of `Math.random()` in SSR components
+- **Shadow Classes**: Always prefer custom shadow classes over Tailwind defaults
+- **Color Usage**: Use CSS variables (`var(--red-500)`) for consistency across themes
 
 ### Reactive Flow
 
@@ -400,6 +433,13 @@ This section covers testing strategies for both frontend and backend components.
 - **Mock Strategies**: API mocking, user event simulation, form state testing
 - **Validation Testing**: Field-level, cross-field, and integration validation scenarios
 
+**Test Maintenance Notes:**
+- After design system updates, tests may need selector adjustments
+- Use flexible matchers: `[class*="shadow"]` instead of exact class names
+- Use regex for split text: `/Enter one email.*per line/` for text across multiple elements
+- Test design intent, not implementation: Check for gradient backgrounds instead of specific classes
+- Example: `expect(badge.className).toMatch(/bg-gradient-to-br.*from-green-500/)` for success states
+
 ### Key Frontend Test Commands
 ```bash
 # Navigate to frontend directory
@@ -436,6 +476,19 @@ Travis CI configuration (`.travis.yml`):
 - Requires Docker Hub credentials as environment variables
 
 ## Important Implementation Notes
+
+### React Hydration (Frontend)
+**Critical**: Components rendered on the server (SSR/SSG) must produce identical output on the client to avoid hydration mismatches.
+
+**Common Issues:**
+- Using `Math.random()` for positioning or styling - generates different values server vs client
+- Using `Date.now()` or non-deterministic values in render
+- Browser-only APIs (window, document) without proper checks
+
+**Solution:**
+- Use deterministic values based on component props (e.g., `index` for positioning)
+- Use `useEffect` or `'use client'` directive for client-only logic
+- Example: Snowflake positioning uses `((index * 7.3 + 13) % 100)` instead of `Math.random()`
 
 ### Null Safety
 All services handle null inputs gracefully:

@@ -17,7 +17,23 @@
       "Bash(npm run test:*)",
       "WebSearch",
       "Bash(npm run dev:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "WebFetch(domain:resend.com)",
+      "WebFetch(domain:sendgrid.com)",
+      "WebFetch(domain:aws.amazon.com)",
+      "WebFetch(domain:www.mailgun.com)",
+      "WebFetch(domain:postmarkapp.com)",
+      "WebFetch(domain:www.cloudflare.com)",
+      "WebFetch(domain:docs.sendgrid.com)",
+      "WebFetch(domain:docs.railway.app)",
+      "WebFetch(domain:www.twilio.com)",
+      "WebFetch(domain:docs.railway.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:support.google.com)",
+      "WebFetch(domain:documentation.mailgun.com)",
+      "WebFetch(domain:www.baeldung.com)",
+      "Bash(cat:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }

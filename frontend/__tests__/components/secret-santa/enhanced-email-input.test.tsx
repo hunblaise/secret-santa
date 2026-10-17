@@ -51,8 +51,11 @@ describe('EnhancedEmailInput', () => {
 
     expect(screen.getByText('Email Addresses')).toBeInTheDocument()
     expect(screen.getByPlaceholderText('Enter emails...')).toBeInTheDocument()
-    expect(screen.getByText(/Enter one email address per line • 0 valid participants/)).toBeInTheDocument()
-    expect(screen.getByText('0 participants')).toBeInTheDocument()
+    // Text is now split across multiple elements in new design
+    expect(screen.getByText(/Enter one email address per line/)).toBeInTheDocument()
+    // Text "0 valid participants" is split: "Enter one email address per line • <span>0</span> valid participants"
+    expect(screen.getByText(/valid participants/)).toBeInTheDocument()
+    expect(screen.getByText(/0 participants?/)).toBeInTheDocument()
   })
 
   it('should validate single valid email', async () => {
@@ -183,19 +186,21 @@ describe('EnhancedEmailInput', () => {
     renderEnhancedInput()
 
     const textarea = screen.getByPlaceholderText('Enter emails...')
-    
-    // Less than 3 participants - destructive badge
+
+    // Less than 3 participants - red gradient badge (new design)
     await user.type(textarea, 'john@example.com\njane@example.com')
     await waitFor(() => {
       const badge = screen.getByText('2 participants')
-      expect(badge).toHaveClass('bg-destructive')
+      // New design uses gradient background
+      expect(badge.className).toMatch(/bg-gradient-to-br.*from-red-500/)
     })
 
-    // 3 or more participants - success badge
+    // 3 or more participants - green gradient badge (new design)
     await user.type(textarea, '\nbob@example.com')
     await waitFor(() => {
       const badge = screen.getByText('3 participants')
-      expect(badge).toHaveClass('bg-green-600')
+      // New design uses green gradient for success
+      expect(badge.className).toMatch(/bg-gradient-to-br.*from-green-500/)
     })
   })
 
@@ -212,8 +217,9 @@ describe('EnhancedEmailInput', () => {
   it('should handle empty input gracefully', () => {
     renderEnhancedInput('')
 
-    expect(screen.getByText('0 participants')).toBeInTheDocument()
-    expect(screen.getByText(/0 valid participants/)).toBeInTheDocument()
+    expect(screen.getByText(/0 participants?/)).toBeInTheDocument()
+    // Text is split across elements: "Enter one email address per line • <span>0</span> valid participants"
+    expect(screen.getByText(/valid participants/)).toBeInTheDocument()
     expect(screen.queryByText(/invalid/)).not.toBeInTheDocument()
     expect(screen.queryByText(/duplicate/)).not.toBeInTheDocument()
   })

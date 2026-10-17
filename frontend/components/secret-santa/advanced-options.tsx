@@ -207,18 +207,18 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
 
   return (
     <Tabs defaultValue="exclusions" className="w-full">
-      <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="exclusions" className="flex items-center gap-2">
-          <Ban className="h-4 w-4" />
-          Exclusions
+      <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-0 h-auto sm:h-9 p-1">
+        <TabsTrigger value="exclusions" className="flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 py-2 sm:py-1">
+          <Ban className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+          <span className="truncate">Exclusions</span>
         </TabsTrigger>
-        <TabsTrigger value="forced" className="flex items-center gap-2">
-          <Heart className="h-4 w-4" />
-          Forced Pairs
+        <TabsTrigger value="forced" className="flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 py-2 sm:py-1">
+          <Heart className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+          <span className="truncate">Forced Pairs</span>
         </TabsTrigger>
-        <TabsTrigger value="names" className="flex items-center gap-2">
-          <Users className="h-4 w-4" />
-          Name Mapping
+        <TabsTrigger value="names" className="flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-2 py-2 sm:py-1">
+          <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+          <span className="truncate">Name Mapping</span>
         </TabsTrigger>
       </TabsList>
 
@@ -232,13 +232,13 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             {exclusionFields.map((field, index) => (
-              <div key={field.id} className="flex items-end gap-2">
+              <div key={field.id} className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-2">
                 <FormField
                   control={activeForm.control}
                   name={`exclusions.${index}.from`}
                   render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel>From</FormLabel>
+                    <FormItem className="flex-1 min-w-0">
+                      <FormLabel className="text-sm">From</FormLabel>
                       <Select onValueChange={(value) => {
                         field.onChange(value)
                         // Validate on change
@@ -251,7 +251,7 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
                         }
                       }} value={field.value}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select giver" />
                           </SelectTrigger>
                         </FormControl>
@@ -267,15 +267,15 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
                     </FormItem>
                   )}
                 />
-                
-                <div className="text-muted-foreground pb-2">cannot give to</div>
-                
+
+                <div className="text-muted-foreground text-sm sm:pb-2 text-center sm:text-left">cannot give to</div>
+
                 <FormField
                   control={activeForm.control}
                   name={`exclusions.${index}.to`}
                   render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel>To</FormLabel>
+                    <FormItem className="flex-1 min-w-0">
+                      <FormLabel className="text-sm">To</FormLabel>
                       <Select onValueChange={(value) => {
                         field.onChange(value)
                         // Validate on change
@@ -288,7 +288,7 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
                         }
                       }} value={field.value}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select receiver" />
                           </SelectTrigger>
                         </FormControl>
@@ -304,13 +304,14 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
                     </FormItem>
                   )}
                 />
-                
+
                 <Button
                   type="button"
                   variant="outline"
                   size="icon"
                   onClick={() => handleRemoveExclusion(index)}
                   aria-label={`Remove exclusion rule ${index + 1}`}
+                  className="sm:mb-0 self-end sm:self-auto"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -341,13 +342,13 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             {forcedPairingFields.map((field, index) => (
-              <div key={field.id} className="flex items-end gap-2">
+              <div key={field.id} className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-2">
                 <FormField
                   control={activeForm.control}
                   name={`forcedPairings.${index}.from`}
                   render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel>From</FormLabel>
+                    <FormItem className="flex-1 min-w-0">
+                      <FormLabel className="text-sm">From</FormLabel>
                       <Select onValueChange={(value) => {
                         field.onChange(value)
                         // Validate on change
@@ -360,7 +361,7 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
                         }
                       }} value={field.value}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select giver" />
                           </SelectTrigger>
                         </FormControl>
@@ -376,15 +377,15 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
                     </FormItem>
                   )}
                 />
-                
-                <div className="text-muted-foreground pb-2">must give to</div>
-                
+
+                <div className="text-muted-foreground text-sm sm:pb-2 text-center sm:text-left">must give to</div>
+
                 <FormField
                   control={activeForm.control}
                   name={`forcedPairings.${index}.to`}
                   render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel>To</FormLabel>
+                    <FormItem className="flex-1 min-w-0">
+                      <FormLabel className="text-sm">To</FormLabel>
                       <Select onValueChange={(value) => {
                         field.onChange(value)
                         // Validate on change
@@ -397,7 +398,7 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
                         }
                       }} value={field.value}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select receiver" />
                           </SelectTrigger>
                         </FormControl>
@@ -413,13 +414,14 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
                     </FormItem>
                   )}
                 />
-                
+
                 <Button
                   type="button"
                   variant="outline"
                   size="icon"
                   onClick={() => handleRemoveForcedPairing(index)}
                   aria-label={`Remove forced pairing ${index + 1}`}
+                  className="sm:mb-0 self-end sm:self-auto"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -450,13 +452,13 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             {nameMappingFields.map((field, index) => (
-              <div key={field.id} className="flex items-end gap-2">
+              <div key={field.id} className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-2">
                 <FormField
                   control={activeForm.control}
                   name={`nameMappings.${index}.email`}
                   render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel>Email</FormLabel>
+                    <FormItem className="flex-1 min-w-0">
+                      <FormLabel className="text-sm">Email</FormLabel>
                       <Select onValueChange={(value) => {
                         field.onChange(value)
                         // Validate on change
@@ -468,7 +470,7 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
                         }
                       }} value={field.value}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select email" />
                           </SelectTrigger>
                         </FormControl>
@@ -484,27 +486,28 @@ export function AdvancedOptions({ form, emailsText }: AdvancedOptionsProps) {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={activeForm.control}
                   name={`nameMappings.${index}.name`}
                   render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel>Display Name</FormLabel>
+                    <FormItem className="flex-1 min-w-0">
+                      <FormLabel className="text-sm">Display Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="John Smith" {...field} />
+                        <Input placeholder="John Smith" {...field} className="w-full" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                
+
                 <Button
                   type="button"
                   variant="outline"
                   size="icon"
                   onClick={() => handleRemoveNameMapping(index)}
                   aria-label={`Remove name mapping ${index + 1}`}
+                  className="sm:mb-0 self-end sm:self-auto"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
