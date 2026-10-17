@@ -138,6 +138,14 @@ Synchronous email mode is the default. Async mode runs in memory and returns `PE
 
 ## 🧪 Development Workflow
 
+### Railway backend deployment
+
+Set the Railway service root directory to `backend`. `nixpacks.toml` selects JDK 21 and Maven for Nixpacks builds; `railpack.json` pins Java 21 for Railpack builds. Both compilation and runtime must support the Java 21 release declared in `pom.xml`.
+
+If the service has an explicit Java version override, set `NIXPACKS_JDK_VERSION=21` (Nixpacks) or `RAILPACK_JDK_VERSION=21` (Railpack). Remove stale `JAVA_HOME` or `PATH` overrides pointing to an older JDK. Redeploy after merging the configuration and confirm the build's Java version is 21. The Maven `java.version` property selects the compiler target; it does not install the matching JDK.
+
+Builder references: [Nixpacks Java](https://nixpacks.com/docs/providers/java), [Railpack Java](https://railpack.com/languages/java).
+
 ### Backend Commands
 ```bash
 ./mvnw clean install           # Clean build with tests
