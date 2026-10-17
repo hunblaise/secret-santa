@@ -190,10 +190,10 @@ describe('ResultsDisplay Enhanced Features', () => {
       .spyOn(document, 'createElement')
       .mockImplementation(((tagName: string, options?: ElementCreationOptions) => {
         if (tagName.toLowerCase() === 'a') {
-          return mockLink as any
+          return mockLink as unknown as HTMLAnchorElement
         }
         return originalCreateElement.call(document, tagName, options)
-      }) as any)
+      }) as typeof document.createElement)
 
     render(<ResultsDisplay results={successResults} onReset={mockOnReset} />)
 

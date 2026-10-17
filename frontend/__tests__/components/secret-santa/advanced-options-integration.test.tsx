@@ -90,10 +90,10 @@ describe('AdvancedOptions Integration Tests', () => {
     // Add participant emails
     const emailsTextarea = screen.getByPlaceholderText(/john@example.com/i)
     await user.clear(emailsTextarea)
-    await user.type(emailsTextarea, 'alice@test.com\nbob@test.com\ncharlie@test.com')
+    await user.paste('alice@test.com\nbob@test.com\ncharlie@test.com')
 
     // Open advanced options
-    const advancedOptionsButton = screen.getByText(/advanced options/i)
+    const advancedOptionsButton = screen.getByText('Advanced Options', { exact: true })
     await user.click(advancedOptionsButton)
 
     return { emailsTextarea }
@@ -498,8 +498,8 @@ describe('AdvancedOptions Integration Tests', () => {
       const addForcedButton = screen.getByRole('button', { name: /add new forced pairing rule/i })
       await user.click(addForcedButton)
 
-      let fromSelect = screen.getByRole('combobox', { name: /from/i })
-      let toSelect = screen.getByRole('combobox', { name: /to/i })
+      const fromSelect = screen.getByRole('combobox', { name: /from/i })
+      const toSelect = screen.getByRole('combobox', { name: /to/i })
 
       // Set initial values: alice -> bob
       await user.click(fromSelect)
